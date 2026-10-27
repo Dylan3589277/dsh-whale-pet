@@ -47,6 +47,24 @@
     '画笔': { bi: 1 },
     '点菜按下': { pointZ: 1 },
     '鲸鱼': { jingyu: 1 }, // 头顶趴一只小鲸鱼；splash 动作就是它喷水（不挂它，splash 什么也看不见）
+    '呆呆眼': { ParamCheek20: 1 }, // 两眼变成空白圆圈，眼神放空（眨眼那一下是两道横线）
+    '情绪花花': { ParamCheek26: 360 }, // 参数是花的旋转角：淡入时从 0 转到 360，正好是一圈花转着冒出来
+    '撤回': { chehui: 1 }, // 桌面「撤回」图标亮起
+    '橡皮': { pi: 1 }, // 桌面「橡皮」图标亮起
+    '魔爪': { mozhua: 1 }, // 桌上一罐粉色魔爪
+    '魔爪换色': { mozhua2: 1 }, // 只给魔爪罐换成白色，单挂看不见，要跟「魔爪」一起挂
+    '墨镜': { ParamCheek71: 1, ParamEyeLOpen: -1, ParamEyeROpen: -1 }, // 像素墨镜（眼睛合上藏在镜片后）
+    '头箍': { ParamCheek38: 3 }, // 头箍开关：3 = 摘掉女仆头箍（默认戴着）
+    '单边马尾': { fx1: 1 },
+    '兔兔贴纸': { ParamCheek82: 1 },
+    '猫猫贴纸': { ParamCheek83: 1 },
+    '蝴蝶结贴纸': { ParamCheek81: 1 },
+    '巴菲': { baleite: 1 }, // 把桌上默认摆着的巴菲拿掉
+    '蛋包饭': { point: -1, danbaofan: 1 }, // 点菜板收起、换成一盘蛋包饭 + 手里的番茄酱瓶
+    '挤': { ji: 1 }, // 捏扁番茄酱瓶，单挂看不见，要配「蛋包饭」
+    '手机换色': { shouji: 1 }, // 粉手机换成白手机，只有手机拿出来（自拍类动作）时看得见
+    '深色桌布': { cc2: 1 },
+    '鲸鱼放桌上': { fangzhuoshang: 1 },
   };
 
   // 一次性动作结束后会把参数停在最后一帧（比如自拍完手机一直举着），这些参数在动作结束后缓回默认值
@@ -54,11 +72,15 @@
     selfie: ['phone', 'phone3', 'phone4', 'phone5', 'phone6', 'ParamMouthForm'],
     selfieQuick: ['phone', 'phone3'],
     splash: ['pengshui'],
+    aidale: ['Param71', 'Param72', 'ParamMouthForm'], // 头上的包
+    ketchup: ['point', 'danbaofan', 'danbaoX', 'danbaoY', 'danbaoz', 'aixing', 'ParamMouthForm', 'ParamMouthOpenY'], // 蛋包饭收回、点菜板放回
+    openLid: ['phone', 'phone4', 'phone6'],
+    bubble: ['chuipaopao', 'chuipaopao1', 'chuipaopao2', 'chuipaopao3', 'chuipaopao4', 'chuipaopao5', 'chuipaopao6', 'chuipaopao7'], // 泡泡和鼓着的腮帮
   };
 
   // 状态 → 表情/动作。每个状态有几套，切进来时随机挑一套、不连着重复同一套。
   //   face: 整个状态期间挂着的表情   pulse: 进来先闪一下的表情 [名字, 毫秒]   motion: 进来时播一次的动作（motionDelay 毫秒后）
-  //   acts: 待在这个状态里时，每隔 actMs 随机做一个小动作（也不连着重复）
+  //   acts: 待在这个状态里时，每隔 actMs 随机做一个小动作（也不连着重复）；小动作里 then: [名字, 毫秒, 延迟] = 隔一会儿再闪一个
   const IDLE_ACTS = [
     { pulse: [['星星眼'], 2600] },
     { pulse: [['脸红'], 3000] },
@@ -69,9 +91,25 @@
     { pulse: [['喵喵手'], 3200] },
     { motion: 'selfieQuick' },
     { pulse: [['鲸鱼'], 4200], motion: 'splash', motionDelay: 500 }, // 小鲸鱼先淡入再喷水
+    // 道具 / 贴纸 / 装扮：挂几秒再摘掉
+    { pulse: [['墨镜'], 3000] },
+    { pulse: [['头箍'], 3600] }, // 摘下头箍透口气（淡入途中会一闪而过半透明的头箍，正常）
+    { pulse: [['单边马尾'], 4000] },
+    { pulse: [['兔兔贴纸'], 3200] },
+    { pulse: [['猫猫贴纸'], 3200] },
+    { pulse: [['蝴蝶结贴纸'], 3200] },
+    { pulse: [['巴菲', '吐舌'], 3000] }, // 偷吃：桌上的巴菲不见了 + 吐舌头
+    { pulse: [['蛋包饭'], 4200], then: [['挤'], 1300, 1300] }, // 端出蛋包饭，过一会儿捏一下番茄酱瓶
+    { pulse: [['深色桌布'], 4000] },
+    { pulse: [['鲸鱼放桌上'], 4200] }, // 小鲸鱼下来趴桌上
+    // 模型自带的另外几段动作
+    { pulse: [['手机换色'], 4300], motion: 'selfie' }, // 换白手机认真自拍（动作 3.3 秒 + 手机收回）
+    { motion: 'openLid' }, // 翻开粉色翻盖手机看一眼
+    { motion: 'ketchup' }, // 蛋包饭上挤番茄酱画爱心
+    { motion: 'bubble' }, // 嚼泡泡糖、吹个泡泡
   ];
   const STATES = {
-    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [12000, 30000] },
+    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [15000, 40000] }, // 小动作有 23 个，间隔放宽一点免得太闹
     received: {
       variants: [
         { pulse: [['感叹号'], 1600], face: ['星星眼'] },
@@ -79,22 +117,38 @@
       ],
     },
     working: {
-      variants: [{ face: ['画笔', '圆眼镜'] }, { face: ['画笔', '方眼镜'] }, { face: ['画笔', '椭圆眼镜'] }],
+      variants: [
+        { face: ['画笔', '圆眼镜'] }, { face: ['画笔', '方眼镜'] }, { face: ['画笔', '椭圆眼镜'] },
+        { face: ['画笔', '圆眼镜', '魔爪'] }, // 桌上摆一罐魔爪提神
+      ],
       taps: true, // 手一下一下往点菜板上按，像在敲字
+      acts: [{ pulse: [['撤回'], 1200] }, { pulse: [['橡皮'], 1600] }], // 干着活偶尔点一下撤回 / 橡皮
+      actMs: [6000, 16000],
       gazeDown: 0.35,
     },
-    waiting: { variants: [{ face: ['问号'] }, { face: ['问号', '流汗'] }] },
+    waiting: { variants: [{ face: ['问号'] }, { face: ['问号', '流汗'] }, { face: ['问号', '呆呆眼'] }] }, // 呆呆眼：等你等到发呆
     done: {
       variants: [
         { face: ['开心兴奋', '双手比耶', '鲸鱼'], motion: 'splash', motionDelay: 500 },
         { face: ['开心兴奋', 'love'] },
         { face: ['爱心眼', 'love', '鲸鱼'], motion: 'splash', motionDelay: 500 },
         { face: ['开心兴奋', '双手比耶', 'love'] },
+        { face: ['开心兴奋', '情绪花花'] }, // 开心到身边转出一圈花
       ],
     },
-    sleepy: { variants: [{ face: ['闭眼口水'] }], acts: [{ pulse: [['吐魂'], 2600] }, { pulse: [['流汗'], 2000] }], actMs: [20000, 45000] },
+    sleepy: {
+      variants: [{ face: ['闭眼口水'] }],
+      acts: [{ pulse: [['吐魂'], 2600] }, { pulse: [['流汗'], 2000] }, { pulse: [['魔爪', '魔爪换色'], 4200] }], // 白魔爪：犯困了续一罐
+      actMs: [20000, 45000],
+    },
     error: { variants: [{ face: ['哭'] }, { face: ['悲伤'] }, { face: ['晕晕'] }, { face: ['阴暗', '流汗'] }] },
-    angry: { variants: [{ face: ['生气', '喵喵手'] }, { face: ['生气', '喵喵手', '感叹号'] }], fade: 0.12 },
+    angry: {
+      variants: [
+        { face: ['生气', '喵喵手'] }, { face: ['生气', '喵喵手', '感叹号'] },
+        { face: ['感叹号'], motion: 'aidale' }, // 被戳 = 挨了一玩具锤：起包、晕眼（动作 4.8 秒，戳完回待机后接着播完）
+      ],
+      fade: 0.12,
+    },
   };
   const FACE_FADE = 0.35; // 表情淡入淡出（秒）
 
@@ -232,6 +286,13 @@
       clearTimeout(motionTimer);
       motionTimer = setTimeout(() => playMotion(group, PIXI.live2d.MotionPriority.NORMAL), delay || 0);
     }
+    let thenTimer = 0;
+    function runAct(a) { // 小动作：闪表情 / 播动作 / 隔一会儿再闪一个（then）
+      if (a.pulse) for (const n of a.pulse[0]) pulses.set(n, performance.now() + a.pulse[1]);
+      if (a.motion) playLater(a.motion, a.motionDelay);
+      clearTimeout(thenTimer);
+      if (a.then) thenTimer = setTimeout(() => { for (const n of a.then[0]) pulses.set(n, performance.now() + a.then[1]); }, a.then[2]);
+    }
     function scheduleAct() {
       clearTimeout(actTimer);
       if (!st.acts) return;
@@ -239,9 +300,7 @@
         if (!oneShot) {
           const i = pickIndex(st.acts.length, lastAct);
           lastAct = i;
-          const a = st.acts[i];
-          if (a.pulse) for (const n of a.pulse[0]) pulses.set(n, performance.now() + a.pulse[1]);
-          if (a.motion) playLater(a.motion, a.motionDelay);
+          runAct(st.acts[i]);
         }
         scheduleAct();
       }, rand(st.actMs[0], st.actMs[1]));
@@ -264,6 +323,7 @@
       baseFace = new Set(v.face || []);
       pulses.clear();
       clearTimeout(motionTimer);
+      clearTimeout(thenTimer);
       if (v.pulse) for (const n of v.pulse[0]) pulses.set(n, performance.now() + v.pulse[1]);
       if (v.motion) playLater(v.motion, v.motionDelay);
       lastAct = -1;
