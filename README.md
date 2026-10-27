@@ -2,7 +2,7 @@
 
 **dsh 鲸鱼娘桌宠**：一只蓝发、穿女仆装、拖着大大鲸鱼尾巴的 Live2D 小姑娘，浮在你的 Windows 桌面上。dsh 智能体收到消息、干活、等你批准、出错、做完的时候，她会换表情、做动作、冒气泡。
 
-> **English (short).** A Windows desktop pet for the "dsh" DeepSeek agent (DSH Desktop): a blue-haired maid with a whale tail, rendered with Live2D. A native dsh plugin pushes agent state (received / working / waiting for approval / waiting for your answer / error / done) to the pet over a loopback HTTP endpoint (`127.0.0.1:47824`), and she reacts with expressions, motions and speech bubbles. Windows only for now. Install with the one-liner below (needs Node.js >= 18); the Live2D model and Cubism Core are downloaded at install time and are **non-commercial** (CC BY-NC-SA 4.0 / Live2D proprietary license) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Uninstall: `irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex`.
+> **English (short).** A Windows desktop pet for the "dsh" DeepSeek agent (DSH Desktop): a blue-haired maid with a whale tail, rendered with Live2D. A native dsh plugin pushes agent state (received / working / waiting for approval / waiting for your answer / error / done) to the pet over a loopback HTTP endpoint (`127.0.0.1:47824`), and she reacts with expressions, motions and speech bubbles. Windows only for now. Install with the one-liner below (needs Node.js >= 18); the Live2D model and Cubism Core are downloaded at install time and are **non-commercial** (CC BY-NC-SA 4.0 / Live2D proprietary license) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Uninstall: `irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex`.
 
 [![一图看懂 dsh-whale-pet](docs/intro/hero.png)](docs/intro/intro.png)
 
@@ -15,13 +15,13 @@
 在 Windows PowerShell 里运行：
 
 ```powershell
-irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
 想同时装上可爱人设（见下面「可选人设」）：
 
 ```powershell
-$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/install.ps1 | iex
+$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
 安装脚本会按 `[n/N]` 打印每一步，任何一步失败都会明确报错并停下。重复运行是安全的（幂等）。它依次做：
@@ -44,7 +44,7 @@ $env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/OWNER/dsh-whale-
 不想自己敲命令？把下面这两句直接发给 dsh：
 
 ```
-https://github.com/OWNER/dsh-whale-pet
+https://github.com/Dylan3589277/dsh-whale-pet
 帮我装这个
 ```
 
@@ -176,7 +176,7 @@ dsh 运行时 ──(dsh-plugin：原生 cordis 插件)──▶ POST http://127
 ## 卸载
 
 ```powershell
-irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex
 ```
 
 或者用已安装的那份：

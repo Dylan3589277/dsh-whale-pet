@@ -69,10 +69,7 @@ section{padding:44px 0 6px;position:relative}
   display:flex;flex-direction:column}
 .shot{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:320/292;
   background:radial-gradient(circle at 50% 38%,#ffffff 0,#eaf3ff 55%,#d7e6ff 100%)}
-.shot:before,.shot:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.75);border:1.5px solid rgba(59,111,216,.18)}
-.shot:before{width:20px;height:20px;left:14px;top:14px}
-.shot:after{width:11px;height:11px;left:40px;top:34px}
-.shot img{display:block;width:100%;height:auto;margin-top:-25%;position:relative;z-index:1}
+.shot img{display:block;width:100%;height:100%;object-fit:cover}
 .meta{padding:12px 6px 0;flex:1;display:flex;flex-direction:column;gap:6px}
 .meta h3{font-size:24px;color:var(--navy);line-height:1.2;display:flex;align-items:center;gap:8px}
 .meta h3 i{width:10px;height:10px;border-radius:50%;background:var(--ocean);display:inline-block;box-shadow:0 0 0 4px rgba(59,111,216,.15)}
@@ -98,30 +95,34 @@ section{padding:44px 0 6px;position:relative}
 .st-idle h3 i{background:#8fb0ea;box-shadow:0 0 0 4px rgba(143,176,234,.3)}
 .st-idle .trig b{background:#7d9bd6}
 
-/* text-only cards */
-.shot.ico{display:grid;place-items:center;background:linear-gradient(160deg,#ece9ff 0,#dfe6ff 55%,#d1e1ff 100%)}
-.shot.ico.mad{background:linear-gradient(160deg,#ffecef 0,#ffe0e8 55%,#ffd3df 100%)}
-.shot.ico .big{font-size:104px;line-height:1;position:relative;z-index:1;filter:drop-shadow(0 8px 10px rgba(31,42,90,.18))}
-.shot.ico .zz{position:absolute;z-index:2;font-family:var(--h);color:var(--ocean);right:58px;top:46px;line-height:1}
-.shot.ico .zz.a{font-size:46px}
-.shot.ico .zz.b{font-size:32px;right:34px;top:92px;opacity:.75}
-.shot.ico .zz.c{font-size:22px;right:84px;top:22px;opacity:.55}
-.shot.ico .vein{position:absolute;z-index:2;right:62px;top:42px;font-size:54px;line-height:1}
-.shot.ico .vein.b{right:auto;left:56px;top:150px;font-size:30px;opacity:.8}
-.shot.ico .face{position:absolute;inset:0}
-
 .note{margin-top:22px;background:#fff;border:2px dashed #b9d0fb;border-radius:18px;padding:14px 22px;color:var(--muted);font-size:15.5px;display:flex;gap:12px;align-items:flex-start}
 .note .ni{font-size:22px;line-height:1.3}
 .note b{color:var(--navy)}
 
-/* ---------- idle chips ---------- */
-.chips{display:flex;flex-wrap:wrap;gap:14px}
-.chip{background:#fff;border-radius:99px;padding:10px 22px 10px 14px;display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;
-  color:var(--navy);box-shadow:var(--shadow);border:2px solid #fff}
-.chip span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--sky)}
-.chip:nth-child(3n+1) span{background:#fff0c7}
-.chip:nth-child(3n+2) span{background:#ffe3ec}
-.chip:nth-child(3n) span{background:#dce9ff}
+/* ---------- expression gallery ---------- */
+.count{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,#fff,#eaf3ff);border:2px solid #fff;border-radius:22px;box-shadow:var(--shadow);padding:16px 26px;margin-bottom:6px}
+.count .big{font-family:var(--h);font-size:30px;color:var(--navy);line-height:1.25;white-space:nowrap}
+.count .big em{font-style:normal;color:var(--ocean);font-size:42px;padding:0 4px}
+.count .sm{font-size:14.5px;color:var(--muted);line-height:1.55;margin-left:auto;text-align:right}
+.gh{display:flex;align-items:baseline;gap:12px;margin:26px 0 12px}
+.gh h3{font-size:25px;color:var(--navy);line-height:1.2;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.gh h3:before{content:"";width:12px;height:12px;border-radius:50%;background:var(--ocean);box-shadow:0 0 0 4px rgba(59,111,216,.16)}
+.gh.p h3:before{background:var(--pink);box-shadow:0 0 0 4px rgba(255,143,177,.25)}
+.gh.y h3:before{background:#ffc83d;box-shadow:0 0 0 4px rgba(255,200,61,.28)}
+.gh.m h3:before{background:#8794bd;box-shadow:0 0 0 4px rgba(135,148,189,.25)}
+.gh span{font-size:14px;color:var(--muted)}
+.gal{display:grid;gap:12px}
+.gal.c6{grid-template-columns:repeat(6,1fr)}
+.gal.c5{grid-template-columns:repeat(5,1fr)}
+.gal.c3{grid-template-columns:repeat(3,1fr);gap:16px}
+.tile{background:#fff;border-radius:16px;padding:6px 6px 8px;box-shadow:var(--shadow);border:2px solid #fff;text-align:center;position:relative}
+.tile .im{border-radius:11px;overflow:hidden;aspect-ratio:1/1;background:radial-gradient(circle at 50% 40%,#fff 0,#eaf3ff 58%,#d7e6ff 100%)}
+.tile img{display:block;width:100%;height:100%;object-fit:cover}
+.tile b{display:block;font-size:15px;font-weight:700;color:var(--navy);margin-top:6px;line-height:1.3}
+.gal.c3 .tile b{font-size:19px}
+.gal.c5 .tile b{font-size:14px}
+.tile .bd{position:absolute;left:12px;top:12px;z-index:2;font-size:11px;font-weight:700;color:#fff;background:var(--pink);border-radius:99px;padding:0 8px;line-height:1.7}
+.gnote{margin-top:14px;font-size:13.5px;color:var(--muted)}
 
 /* ---------- how to play ---------- */
 .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -220,114 +221,187 @@ footer b{color:#cdd8f6;font-weight:500}
   <div class="grid3">
 
     <article class="card st-start">
-      <div class="shot"><img src="snaps/session-start-1.png" alt="打招呼"></div>
+      <div class="shot"><img src="snaps/start.png" alt="打招呼"></div>
       <div class="meta"><h3><i></i>打招呼</h3>
         <p class="trig"><b>触发</b>dsh 开新会话</p>
         <div class="say"><span class="bub">「来啦~」</span></div></div>
     </article>
 
+    <article class="card st-idle">
+      <div class="shot"><img src="snaps/idle.png" alt="待机"></div>
+      <div class="meta"><h3><i></i>待机</h3>
+        <p class="trig"><b>触发</b>没事的时候</p>
+        <div class="say"><span class="fx">呼吸、眨眼、头发 / 裙子 / 尾巴物理摆动</span></div></div>
+    </article>
+
     <article class="card st-recv">
-      <div class="shot"><img src="snaps/received-1.png" alt="收到任务"></div>
+      <div class="shot"><img src="snaps/recv.png" alt="收到任务"></div>
       <div class="meta"><h3><i></i>收到任务</h3>
         <p class="trig"><b>触发</b>你发出消息</p>
-        <div class="say"><span class="bub g">「收到！」</span><span class="fx">星星眼</span></div></div>
+        <div class="say"><span class="bub g">「收到！」</span><span class="fx">星星眼 / 开心兴奋</span></div></div>
     </article>
 
     <article class="card st-work">
-      <div class="shot"><img src="snaps/working-cmd-2.png" alt="跑命令"></div>
+      <div class="shot"><img src="snaps/cmd.png" alt="跑命令"></div>
       <div class="meta"><h3><i></i>跑命令</h3>
         <p class="trig"><b>触发</b>调用终端</p>
-        <div class="say"><span class="bub">「在跑命令…」</span><span class="fx">戴眼镜</span></div></div>
+        <div class="say"><span class="bub">「在跑命令…」</span><span class="fx">戴圆眼镜</span></div></div>
     </article>
 
     <article class="card st-work">
-      <div class="shot"><img src="snaps/working-edit-1.png" alt="改文件"></div>
+      <div class="shot"><img src="snaps/edit.png" alt="改文件"></div>
       <div class="meta"><h3><i></i>改文件</h3>
         <p class="trig"><b>触发</b>编辑代码</p>
-        <div class="say"><span class="bub">「在改文件…」</span></div></div>
+        <div class="say"><span class="bub">「在改文件…」</span><span class="fx">戴方眼镜</span></div></div>
     </article>
 
     <article class="card st-work">
-      <div class="shot"><img src="snaps/working-search-2.png" alt="翻资料"></div>
+      <div class="shot"><img src="snaps/search.png" alt="翻资料"></div>
       <div class="meta"><h3><i></i>翻资料</h3>
         <p class="trig"><b>触发</b>搜索 / 读文件</p>
-        <div class="say"><span class="bub">「在翻资料…」</span></div></div>
+        <div class="say"><span class="bub">「在翻资料…」</span><span class="fx">戴椭圆眼镜</span></div></div>
     </article>
 
     <article class="card st-wait">
-      <div class="shot"><img src="snaps/waiting-approval-2.png" alt="等你批准"></div>
+      <div class="shot"><img src="snaps/approval.png" alt="等你批准"></div>
       <div class="meta"><h3><i></i>等你批准</h3>
         <p class="trig"><b>触发</b>需要你点允许</p>
-        <div class="say"><span class="bub y">「等你批准~」</span><span class="fx">冒汗</span></div></div>
+        <div class="say"><span class="bub y">「等你批准~」</span><span class="fx">头顶问号</span></div></div>
     </article>
 
     <article class="card st-wait">
-      <div class="shot"><img src="snaps/waiting-answer-1.png" alt="有问题问你"></div>
+      <div class="shot"><img src="snaps/answer.png" alt="有问题问你"></div>
       <div class="meta"><h3><i></i>有问题问你</h3>
         <p class="trig"><b>触发</b>dsh 向你提问</p>
-        <div class="say"><span class="bub y">「有问题问你~」</span></div></div>
+        <div class="say"><span class="bub y">「有问题问你~」</span><span class="fx">问号 + 冒汗</span></div></div>
     </article>
 
     <article class="card st-done">
-      <div class="shot"><img src="snaps/done-1.png" alt="搞定"></div>
+      <div class="shot"><img src="snaps/done1.png" alt="搞定"></div>
       <div class="meta"><h3><i></i>搞定</h3>
         <p class="trig"><b>触发</b>任务完成</p>
-        <div class="say"><span class="bub">「搞定啦！」</span><span class="fx">爱心眼，蹦两下</span></div></div>
+        <div class="say"><span class="bub">「搞定啦！」</span><span class="fx">比耶，头顶小鲸鱼喷水</span></div></div>
+    </article>
+
+    <article class="card st-done">
+      <div class="shot"><img src="snaps/done2.png" alt="搞定（另一种）"></div>
+      <div class="meta"><h3><i></i>搞定·换个姿势</h3>
+        <p class="trig"><b>触发</b>任务完成（随机）</p>
+        <div class="say"><span class="bub">「搞定啦！」</span><span class="fx">爱心眼 + 飘爱心</span></div></div>
     </article>
 
     <article class="card st-err">
-      <div class="shot"><img src="snaps/error-1.png" alt="出错"></div>
+      <div class="shot"><img src="snaps/err1.png" alt="出错"></div>
       <div class="meta"><h3><i></i>出错</h3>
         <p class="trig"><b>触发</b>工具报错</p>
-        <div class="say"><span class="bub r">「出错啦！」</span><span class="fx">晕圈眼，抖一抖</span></div></div>
-    </article>
-
-    <article class="card st-idle">
-      <div class="shot"><img src="snaps/idle-12.png" alt="待机"></div>
-      <div class="meta"><h3><i></i>待机</h3>
-        <p class="trig"><b>触发</b>没事的时候</p>
-        <div class="say"><span class="fx long">呼吸、眨眼、头发 / 裙子 / 尾巴物理摆动</span></div></div>
-    </article>
-
-    <article class="card st-idle">
-      <div class="shot ico">
-        <span class="zz c">z</span><span class="zz a">Z</span><span class="zz b">z</span>
-        <span class="big">😴</span>
-      </div>
-      <div class="meta"><h3><i></i>犯困</h3>
-        <p class="trig"><b>触发</b>30 分钟没动静</p>
-        <div class="say"><span class="bub">「Zzz」</span><span class="fx">闭眼流口水</span></div></div>
+        <div class="say"><span class="bub r">「出错啦！」</span><span class="fx">哭哭脸</span></div></div>
     </article>
 
     <article class="card st-err">
-      <div class="shot ico mad">
-        <span class="vein">💢</span><span class="vein b">💢</span>
-        <span class="big">😤</span>
-      </div>
+      <div class="shot"><img src="snaps/err2.png" alt="出错（另一种）"></div>
+      <div class="meta"><h3><i></i>出错·晕圈眼</h3>
+        <p class="trig"><b>触发</b>工具报错（随机）</p>
+        <div class="say"><span class="bub r">「出错啦！」</span><span class="fx">晕圈眼</span></div></div>
+    </article>
+
+    <article class="card st-idle">
+      <div class="shot"><img src="snaps/sleepy.png" alt="犯困"></div>
+      <div class="meta"><h3><i></i>犯困</h3>
+        <p class="trig"><b>触发</b>30 分钟没动静</p>
+        <div class="say"><span class="bub">「Zzz」</span><span class="fx">闭眼流口水，飘 Z</span></div></div>
+    </article>
+
+    <article class="card st-err">
+      <div class="shot"><img src="snaps/angry1.png" alt="生气"></div>
       <div class="meta"><h3><i></i>生气</h3>
         <p class="trig"><b>触发</b>你戳她一下</p>
-        <div class="say"><span class="fx">气鼓鼓 1.5 秒</span></div></div>
+        <div class="say"><span class="bub">「哼，不理你了！」</span><span class="fx">生气 + 喵喵手</span></div></div>
+    </article>
+
+    <article class="card st-err">
+      <div class="shot"><img src="snaps/angry2.png" alt="生气（另一种）"></div>
+      <div class="meta"><h3><i></i>生气·戳到痒处</h3>
+        <p class="trig"><b>触发</b>你戳她一下（随机）</p>
+        <div class="say"><span class="bub">「痒…」</span><span class="fx">生气 + 喵喵手 + 感叹号</span></div></div>
     </article>
 
   </div>
   <div class="note"><span class="ni">💬</span><div><b>其它工作状态：</b>在上网查… / 在派分身… / 在列计划… / 干活中…；多会话显示 ×N，有分身显示（分身×N）</div></div>
 </section>
 
-<!-- 4. IDLE CHIPS -->
+<!-- 4. EXPRESSION GALLERY -->
 <section>
-  <div class="sec-h"><div class="sec-ico">🎈</div><h2>待机小动作</h2></div>
-  <p class="sec-sub">没事的时候她也不闲着，会隔一会儿随机来个小动作。</p>
-  <div class="chips">
-    <div class="chip"><span>✨</span>星星眼</div>
-    <div class="chip"><span>🌸</span>脸红</div>
-    <div class="chip"><span>💓</span>心跳</div>
-    <div class="chip"><span>😜</span>调皮</div>
-    <div class="chip"><span>😍</span>爱心眼</div>
-    <div class="chip"><span>😛</span>吐舌</div>
-    <div class="chip"><span>🐾</span>喵喵手</div>
-    <div class="chip"><span>🤳</span>快速自拍</div>
-    <div class="chip"><span>🐳</span>小鲸鱼喷水</div>
+  <div class="sec-h"><div class="sec-ico">🎈</div><h2>表情图鉴</h2><span class="tag">47 张真实截图</span></div>
+  <p class="sec-sub">没事的时候她也不闲着。下面每一张都是桌宠实际运行时的截图。</p>
+  <div class="count">
+    <div class="big">桌宠共用到<em>26</em>个表情 +<em>3</em>个动作</div>
+    <div class="sm">模型本身共 44 个表情 / 道具、8 个动作；<br>其余 18 个表情、5 个动作桌宠暂未用到（见最后一组）。</div>
   </div>
+
+  <div class="gh"><h3>表情</h3><span>随状态切换，12 个</span></div>
+  <div class="gal c6">
+    <figure class="tile"><div class="im"><img src="expr/x01.png" alt="开心兴奋"></div><b>开心兴奋</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x02.png" alt="生气"></div><b>生气</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x03.png" alt="哭"></div><b>哭</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x04.png" alt="悲伤"></div><b>悲伤</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x05.png" alt="晕晕"></div><b>晕晕</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x06.png" alt="阴暗"></div><b>阴暗</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x07.png" alt="闭眼口水"></div><b>闭眼口水</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x08.png" alt="流汗"></div><b>流汗</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x09.png" alt="问号"></div><b>问号</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x10.png" alt="感叹号"></div><b>感叹号</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x11.png" alt="吐魂"></div><b>吐魂</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x12.png" alt="love"></div><b>love</b></figure>
+  </div>
+
+  <div class="gh p"><h3>待机小动作</h3><span>没事的时候隔一会儿随机来一个，共 9 个（7 个表情 + 2 个动作）</span></div>
+  <div class="gal c3">
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x13.png" alt="星星眼"></div><b>星星眼</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x14.png" alt="脸红"></div><b>脸红</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x15.png" alt="心跳"></div><b>心跳</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x16.png" alt="调皮"></div><b>调皮</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x17.png" alt="爱心眼"></div><b>爱心眼</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x18.png" alt="吐舌"></div><b>吐舌</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x19.png" alt="喵喵手"></div><b>喵喵手</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x20.png" alt="快速自拍"></div><b>快速自拍</b></figure>
+    <figure class="tile"><span class="bd">待机随机</span><div class="im"><img src="expr/x21.png" alt="小鲸鱼喷水"></div><b>小鲸鱼喷水</b></figure>
+  </div>
+
+  <div class="gh y"><h3>道具与装扮</h3><span>干活时的眼镜、画笔，搞定时的比耶和头顶小鲸鱼</span></div>
+  <div class="gal c6">
+    <figure class="tile"><div class="im"><img src="expr/x22.png" alt="圆眼镜"></div><b>圆眼镜</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x23.png" alt="方眼镜"></div><b>方眼镜</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x24.png" alt="椭圆眼镜"></div><b>椭圆眼镜</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x25.png" alt="画笔"></div><b>画笔</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x26.png" alt="双手比耶"></div><b>双手比耶</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x27.png" alt="鲸鱼"></div><b>鲸鱼</b></figure>
+  </div>
+
+  <div class="gh m"><h3>模型还藏着</h3><span>桌宠暂未使用：15 个表情 / 道具 + 5 个动作</span></div>
+  <div class="gal c5">
+    <figure class="tile"><div class="im"><img src="expr/x28.png" alt="呆呆眼"></div><b>呆呆眼</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x29.png" alt="墨镜"></div><b>墨镜</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x30.png" alt="头箍"></div><b>头箍</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x31.png" alt="单边马尾"></div><b>单边马尾</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x32.png" alt="情绪花花"></div><b>情绪花花</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x33.png" alt="兔兔贴纸"></div><b>兔兔贴纸</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x34.png" alt="猫猫贴纸"></div><b>猫猫贴纸</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x35.png" alt="蝴蝶结贴纸"></div><b>蝴蝶结贴纸</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x36.png" alt="橡皮"></div><b>橡皮</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x37.png" alt="撤回"></div><b>撤回</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x38.png" alt="蛋包饭"></div><b>蛋包饭</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x39.png" alt="魔爪"></div><b>魔爪</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x40.png" alt="深色桌布"></div><b>深色桌布</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x41.png" alt="鲸鱼放桌上"></div><b>鲸鱼放桌上</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x42.png" alt="巴菲"></div><b>巴菲</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x43.png" alt="自拍"></div><b>自拍</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x44.png" alt="敲锤子"></div><b>敲锤子</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x45.png" alt="番茄酱"></div><b>番茄酱</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x46.png" alt="开盖"></div><b>开盖</b></figure>
+    <figure class="tile"><div class="im"><img src="expr/x47.png" alt="吹泡泡"></div><b>吹泡泡</b></figure>
+  </div>
+
+  <p class="gnote">说明：动作类（快速自拍、小鲸鱼喷水、自拍、敲锤子、番茄酱、开盖、吹泡泡）取动画中的一帧。「头箍」「巴菲」是把头箍 / 桌上的巴菲摘掉；「橡皮」「撤回」只是桌面图标高亮。另有 4 个小项单独触发时画面几乎无变化，未单列：点菜按下（干活时按桌面图标，属于桌宠用到的 26 个）、挤、手机换色、魔爪换色。</p>
 </section>
 
 <!-- 5. HOW TO PLAY -->
@@ -361,28 +435,28 @@ footer b{color:#cdd8f6;font-weight:500}
 
     <div class="way a">
       <div class="way-h"><span class="n">A</span>方法 <span style="font-family:var(--b);font-weight:900">A</span><span class="badge-gold" style="margin-left:2px">最省事</span></div>
-      <p class="say-it">把仓库链接 <code class="ic">https://github.com/<span class="repo">OWNER/dsh-whale-pet</span></code> 发给你的 dsh，说一句「帮我装这个」。</p>
-      <div class="chat"><div class="av">🧑‍💻</div><div class="msg"><span class="mono">https://github.com/<span class="repo">OWNER/dsh-whale-pet</span></span><br>帮我装这个</div></div>
+      <p class="say-it">把仓库链接 <code class="ic">https://github.com/<span class="repo">Dylan3589277/dsh-whale-pet</span></code> 发给你的 dsh，说一句「帮我装这个」。</p>
+      <div class="chat"><div class="av">🧑‍💻</div><div class="msg"><span class="mono">https://github.com/<span class="repo">Dylan3589277/dsh-whale-pet</span></span><br>帮我装这个</div></div>
     </div>
 
     <div class="way">
       <div class="way-h"><span class="n">B</span>方法 <span style="font-family:var(--b);font-weight:900">B</span><span class="badge-gold" style="margin-left:2px">一行命令</span></div>
       <p class="why">打开 PowerShell，粘贴回车：</p>
       <div class="term"><div class="bar"><i></i><i></i><i></i><em>PowerShell</em></div>
-<pre>irm https://raw.githubusercontent.com/<span class="repo">OWNER/dsh-whale-pet</span>/main/install.ps1 | iex</pre></div>
+<pre>irm https://raw.githubusercontent.com/<span class="repo">Dylan3589277/dsh-whale-pet</span>/main/install.ps1 | iex</pre></div>
     </div>
 
     <div class="way persona">
       <div class="way-h"><span class="n">♡</span>想要可爱人设<span class="badge-gold" style="margin-left:2px;background:#ffd1e0;color:#a0305a">可选</span></div>
       <p class="why">让 dsh 用桌宠的语气说话，装的时候多加一句：</p>
       <div class="term"><div class="bar"><i></i><i></i><i></i><em>PowerShell</em></div>
-<pre>$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/<span class="repo">OWNER/dsh-whale-pet</span>/main/install.ps1 | iex</pre></div>
+<pre style="font-size:13px">$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/<span class="repo">Dylan3589277/dsh-whale-pet</span>/main/install.ps1 | iex</pre></div>
     </div>
 
     <div class="way un">
       <div class="way-h"><span class="n">✕</span>卸载</div>
       <div class="term"><div class="bar"><i></i><i></i><i></i><em>PowerShell</em></div>
-<pre>irm https://raw.githubusercontent.com/<span class="repo">OWNER/dsh-whale-pet</span>/main/uninstall.ps1 | iex</pre></div>
+<pre>irm https://raw.githubusercontent.com/<span class="repo">Dylan3589277/dsh-whale-pet</span>/main/uninstall.ps1 | iex</pre></div>
     </div>
 
     <div class="foot-note"><span class="ni">🔥</span><div>插件热加载，<b>装完不用重启 dsh</b>；模型和 Live2D Core 在安装时自动下载并校验。</div></div>
@@ -403,8 +477,8 @@ footer b{color:#cdd8f6;font-weight:500}
 </footer>
 
 <script>
-  // 发布后只需改这一行（当前是占位 OWNER）
-  const REPO = "OWNER/dsh-whale-pet";
+  // 仓库地址只在这一行，改了重新渲染即可
+  const REPO = "Dylan3589277/dsh-whale-pet";
   document.querySelectorAll(".repo").forEach(function(el){ el.textContent = REPO; });
   // 渲染用：字体就绪后把页面高度写到 <html data-h>，供无头截图取高度
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(function(){

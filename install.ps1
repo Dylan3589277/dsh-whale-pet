@@ -1,6 +1,6 @@
 # dsh-whale-pet installer - Windows PowerShell 5.1+ (PowerShell 7 also works).
 #
-#   irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 #
 # Optional environment variables (set them in the same window BEFORE running; see README.md):
 #   DSH_HOME DSH_PET_PROFILE DSH_PET_HOME DSH_PET_SRC DSH_PET_ZIP_URL DSH_PET_MODEL_BASE
@@ -10,7 +10,7 @@
 # No "exit" (it would close the window of someone running this through iex) and no $PSScriptRoot.
 
 & {
-    $Repo = 'OWNER/dsh-whale-pet'   # GitHub owner/name - the only place to edit before publishing
+    $Repo = 'Dylan3589277/dsh-whale-pet'   # GitHub owner/name - the only place to edit before publishing
 
     $ErrorActionPreference = 'Stop'
     $ProgressPreference = 'SilentlyContinue'
@@ -471,7 +471,7 @@
         Write-Host "  install dir : $InstallDir"
         foreach ($c in $S.Changes) { Write-Host "  changed     : $c" }
         foreach ($b in $S.Backups) { Write-Host "  backup      : $b" }
-        Write-Host '  uninstall   : irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex'.Replace('OWNER/dsh-whale-pet', $Repo)
+        Write-Host '  uninstall   : irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex'.Replace('Dylan3589277/dsh-whale-pet', $Repo)
         Write-Host "                or: powershell -ExecutionPolicy Bypass -File `"$InstallDir\uninstall.ps1`""
         Write-Host '                (if you used custom DSH_HOME / DSH_PET_HOME / DSH_PET_PROFILE, set the same variables first)'
     } catch {

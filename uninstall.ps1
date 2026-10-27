@@ -1,6 +1,6 @@
 # dsh-whale-pet uninstaller - Windows PowerShell 5.1+ (PowerShell 7 also works).
 #
-#   irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex
+#   irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex
 #   powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\dsh-whale-pet\uninstall.ps1"
 #
 # Uses the same optional environment variables as install.ps1 (set the same ones you used to install):

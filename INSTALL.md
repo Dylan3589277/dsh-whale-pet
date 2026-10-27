@@ -1,6 +1,6 @@
 # INSTALL.md — 给 AI 智能体（dsh）看的安装说明
 
-> 你是 dsh（或其它能执行 PowerShell 的智能体）。用户给了你本仓库的链接 `https://github.com/OWNER/dsh-whale-pet`，并说了「帮我装这个」。按下面的步骤做。每一步都有要执行的命令和判断成功的检查；**检查没过就停下来，把报错原文告诉用户，不要硬往下走**。
+> 你是 dsh（或其它能执行 PowerShell 的智能体）。用户给了你本仓库的链接 `https://github.com/Dylan3589277/dsh-whale-pet`，并说了「帮我装这个」。按下面的步骤做。每一步都有要执行的命令和判断成功的检查；**检查没过就停下来，把报错原文告诉用户，不要硬往下走**。
 >
 > 约定：所有命令用 Windows PowerShell 执行。如果你的工具只能跑单条命令，用 `powershell -NoProfile -ExecutionPolicy Bypass -Command "<命令>"` 包一层。
 
@@ -49,13 +49,13 @@ Test-Path "$env:USERPROFILE\.dsh\profiles\web"
 不带人设（`$persona = $false`）：
 
 ```powershell
-irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
 带人设（`$persona = $true`）：
 
 ```powershell
-$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/install.ps1 | iex
+$env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
 安装脚本会打印 `[1/N]`、`[2/N]` … 的进度，幂等（重复运行安全），任何一步失败都会报错并停下。它做的事：预检 → 下载仓库 → 复制到安装目录 → `npm install` → 下载 Cubism Core → 下载并校验 64 个模型文件（逐个 sha256）→ 备份并追加 `cordis.patch.yml` → （可选）写人设 → 生成 hook 配置 → 建开始菜单快捷方式 → 启动桌宠。
@@ -140,7 +140,7 @@ $dsh = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join-Path $env:USERPROFILE '.
 用户说要卸载时：
 
 ```powershell
-irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex
 ```
 
 或者用已安装的那份：
@@ -173,7 +173,7 @@ $dshHome; $dst
 $tmp = Join-Path $env:TEMP 'dsh-whale-pet-src'
 Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $tmp | Out-Null
-Invoke-WebRequest -UseBasicParsing 'https://github.com/OWNER/dsh-whale-pet/archive/refs/heads/main.zip' -OutFile "$tmp\src.zip"
+Invoke-WebRequest -UseBasicParsing 'https://github.com/Dylan3589277/dsh-whale-pet/archive/refs/heads/main.zip' -OutFile "$tmp\src.zip"
 Expand-Archive "$tmp\src.zip" -DestinationPath $tmp
 New-Item -ItemType Directory -Force $dst | Out-Null
 Copy-Item "$tmp\dsh-whale-pet-main\*" $dst -Recurse -Force
