@@ -44,7 +44,7 @@ This repository's own code is MIT-licensed (see [LICENSE](LICENSE)) and that lic
 ## 5. 其它说明
 
 - 早期版本使用过的静态贴纸（网格动画回落用）**未获再分发许可，本仓库不包含**。如果你自己放入 `assets/sprites.json` 与图片启用回落动画，请自行确认这些图片的许可。
-- `docs/intro/` 里的介绍图（`intro.png`、`hero.png`、`snaps/*.png`）含有上述 Live2D 模型的运行截图，以及据该模型 AI 生成的插画，属于模型的衍生作品，**按 CC BY-NC-SA 4.0 授权（非商业、相同方式共享）**，不适用本仓库代码的 MIT 许可。介绍图的版式与文字（`intro.html`）为 MIT。
+- `docs/intro/` 里的介绍图（`intro.png`、`intro-preview.jpg`、`hero.png`、`snaps/*.png`、`gif/*.gif`）含有上述 Live2D 模型的运行截图，以及据该模型 AI 生成的插画，属于模型的衍生作品，**按 CC BY-NC-SA 4.0 授权（非商业、相同方式共享）**，不适用本仓库代码的 MIT 许可。介绍图的版式与文字（`intro.html`）为 MIT。
 - 若发现遗漏或署名有误，请开 issue，会尽快更正。
 
 ---

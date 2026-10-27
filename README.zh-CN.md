@@ -8,7 +8,18 @@
 
 *点击海报查看原尺寸大图。介绍图含模型截图与衍生插画，按 CC BY-NC-SA 4.0 授权，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。*
 
-<!-- DEMO-GIFS: animated demos go here -->
+<table>
+<tr>
+<td align="center"><img src="docs/intro/gif/done.gif" width="240" alt="完成"><br>任务完成：比耶，头上小鲸鱼喷水</td>
+<td align="center"><img src="docs/intro/gif/angry.gif" width="240" alt="生气"><br>戳她一下：生气啦</td>
+<td align="center"><img src="docs/intro/gif/sleepy.gif" width="240" alt="犯困"><br>发呆 30 分钟：犯困 Zzz</td>
+</tr>
+<tr>
+<td align="center"><img src="docs/intro/gif/sunglasses.gif" width="240" alt="墨镜"><br>待机小动作：戴像素墨镜</td>
+<td align="center"><img src="docs/intro/gif/bubble.gif" width="240" alt="泡泡糖"><br>待机小动作：吹泡泡糖</td>
+<td align="center"><img src="docs/intro/gif/ketchup.gif" width="240" alt="蛋包饭"><br>待机小动作：蛋包饭挤番茄酱</td>
+</tr>
+</table>
 
 ## 她会对什么有反应
 

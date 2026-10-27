@@ -8,7 +8,18 @@
 
 *Click the poster for the full-resolution version. It contains screenshots of the model and derived illustrations, licensed CC BY-NC-SA 4.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).*
 
-<!-- DEMO-GIFS: animated demos go here -->
+<table>
+<tr>
+<td align="center"><img src="docs/intro/gif/done.gif" width="240" alt="done"><br>Task done: V-sign, the little whale spouts water</td>
+<td align="center"><img src="docs/intro/gif/angry.gif" width="240" alt="angry"><br>Poke her: she gets angry</td>
+<td align="center"><img src="docs/intro/gif/sleepy.gif" width="240" alt="sleepy"><br>30 min idle: sleepy, Zzz</td>
+</tr>
+<tr>
+<td align="center"><img src="docs/intro/gif/sunglasses.gif" width="240" alt="sunglasses"><br>Idle act: pixel sunglasses</td>
+<td align="center"><img src="docs/intro/gif/bubble.gif" width="240" alt="bubble"><br>Idle act: bubble gum</td>
+<td align="center"><img src="docs/intro/gif/ketchup.gif" width="240" alt="ketchup"><br>Idle act: omelette rice with ketchup</td>
+</tr>
+</table>
 
 ## What she reacts to
 
