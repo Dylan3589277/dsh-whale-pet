@@ -4,6 +4,10 @@
 
 > **English (short).** A Windows desktop pet for the "dsh" DeepSeek agent (DSH Desktop): a blue-haired maid with a whale tail, rendered with Live2D. A native dsh plugin pushes agent state (received / working / waiting for approval / waiting for your answer / error / done) to the pet over a loopback HTTP endpoint (`127.0.0.1:47824`), and she reacts with expressions, motions and speech bubbles. Windows only for now. Install with the one-liner below (needs Node.js >= 18); the Live2D model and Cubism Core are downloaded at install time and are **non-commercial** (CC BY-NC-SA 4.0 / Live2D proprietary license) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Uninstall: `irm https://raw.githubusercontent.com/OWNER/dsh-whale-pet/main/uninstall.ps1 | iex`.
 
+[![一图看懂 dsh-whale-pet](docs/intro/hero.png)](docs/intro/intro.png)
+
+👉 **[一图看懂：她有哪些动作、怎么玩、怎么装](docs/intro/intro.png)**（介绍图含模型截图与衍生插画，按 CC BY-NC-SA 4.0 授权，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)）
+
 ## 一键安装
 
 前置条件：Windows、Node.js 18 或更高（带 npm）、已经装过并打开过一次 DSH Desktop（`~\.dsh\profiles\web` 目录存在）。没有 Node.js 的话：`winget install OpenJS.NodeJS.LTS`，装完重开一个 PowerShell 窗口。

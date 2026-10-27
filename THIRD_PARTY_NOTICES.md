@@ -39,13 +39,14 @@ This repository's own code is MIT-licensed (see [LICENSE](LICENSE)) and that lic
 
 ## 4. Electron
 
-[Electron](https://www.electronjs.org/)（MIT）通过 `npm install` 在安装时下载（`package.json` 里声明为 `^45.0.0`，安装脚本使用 Electron 45.0.0），不随仓库分发。其自带的 Chromium 等组件各有自己的许可，随 Electron 一并发布，见 Electron 安装目录里的 `LICENSE` 与 `LICENSES.chromium.html`。
+[Electron](https://www.electronjs.org/)（MIT）通过 `npm install` 在安装时下载（`package.json` 里固定为 `45.0.0`），不随仓库分发。其自带的 Chromium 等组件各有自己的许可，随 Electron 一并发布，见 Electron 安装目录里的 `LICENSE` 与 `LICENSES.chromium.html`。
 
 ## 5. 其它说明
 
 - 早期版本使用过的静态贴纸（网格动画回落用）**未获再分发许可，本仓库不包含**。如果你自己放入 `assets/sprites.json` 与图片启用回落动画，请自行确认这些图片的许可。
+- `docs/intro/` 里的介绍图（`intro.png`、`hero.png`、`snaps/*.png`）含有上述 Live2D 模型的运行截图，以及据该模型 AI 生成的插画，属于模型的衍生作品，**按 CC BY-NC-SA 4.0 授权（非商业、相同方式共享）**，不适用本仓库代码的 MIT 许可。介绍图的版式与文字（`intro.html`）为 MIT。
 - 若发现遗漏或署名有误，请开 issue，会尽快更正。
 
 ---
 
-*English summary:* Live2D model "c_0120" is by 上善无形 (original character 溟月), ZipZipPipe (maid whale-girl redesign) and 氵六青 (Live2D rigging), licensed CC BY-NC-SA 4.0 (non-commercial, share-alike); it is downloaded at install time from the upstream repository at the pinned commit above and is not redistributed or modified here. Live2D Cubism Core is © Live2D Inc. under its proprietary license, downloaded from the official URL and never redistributed — you are responsible for complying with Live2D's terms. PIXI.js 6.5.10, pixi-live2d-display 0.4.0 and Electron are MIT-licensed.
+*English summary:* Live2D model "c_0120" is by 上善无形 (original character 溟月), ZipZipPipe (maid whale-girl redesign) and 氵六青 (Live2D rigging), licensed CC BY-NC-SA 4.0 (non-commercial, share-alike); it is downloaded at install time from the upstream repository at the pinned commit above and is not redistributed or modified here. The intro images under `docs/intro/` (screenshots of the model and AI artwork derived from it) are derivative works and are licensed CC BY-NC-SA 4.0, not MIT. Live2D Cubism Core is © Live2D Inc. under its proprietary license, downloaded from the official URL and never redistributed — you are responsible for complying with Live2D's terms. PIXI.js 6.5.10, pixi-live2d-display 0.4.0 and Electron are MIT-licensed.
