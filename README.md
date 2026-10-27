@@ -1,230 +1,238 @@
 # dsh-whale-pet
 
-**dsh 鲸鱼娘桌宠**：一只蓝发、穿女仆装、拖着大大鲸鱼尾巴的 Live2D 小姑娘，浮在你的 Windows 桌面上。dsh 智能体收到消息、干活、等你批准、出错、做完的时候，她会换表情、做动作、冒气泡。
+**English** | [简体中文](README.zh-CN.md)
 
-> **English (short).** A Windows desktop pet for the "dsh" DeepSeek agent (DSH Desktop): a blue-haired maid with a whale tail, rendered with Live2D. A native dsh plugin pushes agent state (received / working / waiting for approval / waiting for your answer / error / done) to the pet over a loopback HTTP endpoint (`127.0.0.1:47824`), and she reacts with expressions, motions and speech bubbles. Windows only for now. Install with the one-liner below (needs Node.js >= 18); the Live2D model and Cubism Core are downloaded at install time and are **non-commercial** (CC BY-NC-SA 4.0 / Live2D proprietary license) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Uninstall: `irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex`.
+**DS whale maid girl desktop pet.** A blue-haired Live2D maid with a big whale tail who floats on your Windows desktop. When your dsh agent receives a message, gets to work, waits for your approval, hits an error or finishes, she changes expression, plays a motion and pops up a speech bubble. A native dsh plugin feeds her over a loopback HTTP endpoint (`127.0.0.1:47824`), and a bundled hook script lets Claude Code-style hooks drive her too. Windows only for now.
 
-[![一图看懂 dsh-whale-pet](docs/intro/hero.png)](docs/intro/intro.png)
+[![intro](docs/intro/intro-preview.jpg)](docs/intro/intro.png)
 
-👉 **[一图看懂：她有哪些动作、怎么玩、怎么装](docs/intro/intro.png)**（介绍图含模型截图与衍生插画，按 CC BY-NC-SA 4.0 授权，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)）
+*Click the poster for the full-resolution version. It contains screenshots of the model and derived illustrations, licensed CC BY-NC-SA 4.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).*
 
-## 一键安装
+<!-- DEMO-GIFS: animated demos go here -->
 
-前置条件：Windows、Node.js 18 或更高（带 npm）、已经装过并打开过一次 DSH Desktop（`~\.dsh\profiles\web` 目录存在）。没有 Node.js 的话：`winget install OpenJS.NodeJS.LTS`，装完重开一个 PowerShell 窗口。
+## What she reacts to
 
-在 Windows PowerShell 里运行：
+She is not decoration: she is dsh's "work status light". The dsh plugin translates runtime events into "pet events" and sends them to her. Here is how dsh events map to pet events (based on the dsh 0.2.1 runtime events):
+
+| Pet event | dsh event |
+|---|---|
+| `SessionStart` | `agent/created` (root agent) |
+| `UserPromptSubmit` | `user/message` inside `session/event`; automatic wake-ups with no user message are covered by `agent/status running` |
+| `PreToolUse` / `PostToolUse` | `tools/pre-execute` / `tools/post-execute` (carry `tool_name`; tools of sub-agents are merged into the root session) |
+| `Stop` | `agent/status idle` (root agent) |
+| `SubagentStart` / `SubagentStop` | `subagent/start` / `subagent/end` |
+| `WaitingApproval` | `approval/request` (waiting for your approval) |
+| `WaitingAnswer` | `user-questions/request` (waiting for your answer) |
+| `Resume` | after the two requests above have been answered (with several in parallel, only after all are answered) |
+| `Error` | `agent/error` (the final failure after retries are exhausted; `agent/request-error`, which retries automatically, is not reported) |
+
+### State machine
+
+State is tracked per session (`session_id`). When several sessions are merged, the priority is: error > waiting > working > received > done > sleepy / idle.
+
+- Your message arrives: **received** (bubble "收到！" = "Got it!", with an exclamation-mark expression). If no tool event follows within 1.5 s she switches to **working** ("想一想…" = "Thinking...").
+- Around tool execution: **working**. The bubble depends on the tool category: commands "在跑命令…" (running a command) / file edits "在改文件…" (editing files) / read and search "在翻资料…" (digging through material) / web "在上网查…" (searching the web) / sub-agents "在派分身…" (dispatching sub-agents) / planning "在列计划…" (making a plan) / anything else "干活中…" (working).
+- A turn ends: **done** ("搞定啦！" = "All done!", two hops plus sparkles), back to **idle** after 8 s.
+- Working for more than 15 minutes without any event: idle. After 30 minutes of idle: **sleepy** (Zzz).
+- Waiting for your approval: **waiting** ("等你批准~" = "Waiting for your approval~"). Waiting for your answer: **waiting** ("有问题问你~" = "I have a question for you~"). The bubble turns yellow, with a gentle sway and a small hop. While waiting, events from parallel tools do not steal the state; after you answer she goes back to working ("继续干活…" = "Back to work..."). After 2 hours with no activity: idle.
+- Error: **error** ("出错啦！" = "Something went wrong!", shakes for 1.6 s, red bubble). A Stop right after it does not overwrite it; 8 s without new events: idle; a new working event: working.
+- With two or more sessions working (or waiting) at once, the bubble gets a `×N ` prefix; with sub-agents running, it gets a `(分身×N)` suffix ("分身" = sub-agent).
+
+### State to expression / motion
+
+Each state has several looks; one is picked at random when she enters the state, never the same one twice in a row. Expressions are stacked model parameters, faded in and out over 0.35 s. She uses 44 expressions / props and 8 motions of the model.
+
+| State | What you see |
+|---|---|
+| idle | Only idle motion (breathing, blinking, physics sway of hair, skirt and tail). Every 15 to 40 s one of 23 random small acts plays and resets itself after a few seconds. 17 are expressions / outfits: star eyes / blush / heartbeat / mischievous / heart eyes / tongue out / cat paws; sunglasses / taking off the headband / side ponytail / bunny, cat and bow stickers / sneaking a parfait / serving an omelet rice / dark tablecloth / the little whale lying on the desk. 6 are motions: quick selfie, the little whale popping up on her head and spraying water, selfie with a white phone, flipping open a flip phone, squeezing ketchup on the omelet rice, blowing a bubble-gum bubble |
+| received | Exclamation mark flash + star eyes, or exclamation mark flash + happy excitement |
+| working | Picks up a paintbrush and wears one of round / square / oval glasses (sometimes with a can of Monster energy drink on the desk), taps now and then, occasionally lights up the undo / eraser icon on the desktop, and looks down |
+| waiting | Question mark, or question mark + sweat drop, or question mark + blank stare |
+| done | Happy excitement combined with a peace sign / hearts / little whale spraying water / a ring of flowers around her |
+| sleepy | Eyes closed, drooling; occasionally a soul leaves her body, she sweats, or she refills with a can of white Monster |
+| error | One of: crying / sad / dizzy / gloomy + sweat drop |
+| angry (when poked) | Angry + cat paws (sometimes with an exclamation mark), or getting hit by a toy hammer (a bump and dizzy eyes, the motion plays to the end); back to the previous state after 1.5 s |
+
+## How to play
+
+- **Drag**: hold the left mouse button and drag. The position is remembered (saved in `%APPDATA%\dsh-whale-pet\pet-position.json`), so she is where you left her next time; on first run she sits in the bottom-right corner of the primary display.
+- **Poke**: a single click pokes her. She gets angry for 1.5 s and says one of "哈！别戳！" / "再戳要咬你了！" / "痒…" / "干嘛啦～" / "哼，不理你了！" (roughly: "Hey, stop poking!" / "Poke me again and I'll bite!" / "That tickles..." / "What is it now~" / "Hmph, I'm ignoring you!"), then returns to her previous state.
+- **Right-click menu**: "打开 dsh" (open dsh; opens `http://127.0.0.1:3080` in your browser) / "退出" (quit).
+- **Click-through**: transparent parts of the window let the mouse pass straight through, so she never blocks the programs behind her. She only reacts when the mouse is on her.
+- **Gaze**: her eyes follow the mouse anywhere on the screen.
+- **Idle random acts**: when nothing is going on she does not just stand still; every 15 to 40 s she plays a random small act (see the idle row of the table above).
+- **Only one at a time**: launching a second copy exits immediately.
+- Search for "DSH Whale Pet" in the Start menu to relaunch her at any time.
+
+## Install
+
+### Prerequisites
+
+Windows 10 / 11, Node.js 18 or newer (with npm), and DSH Desktop installed and opened at least once (the `~\.dsh\profiles\web` directory exists). If you don't have Node.js: `winget install OpenJS.NodeJS.LTS`, then open a new PowerShell window.
+
+### One-line install
+
+Run this in Windows PowerShell:
 
 ```powershell
 irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
-想同时装上可爱人设（见下面「可选人设」）：
+To also install the cute persona (see "Optional persona" below):
 
 ```powershell
 $env:DSH_PET_PERSONA='1'; irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/install.ps1 | iex
 ```
 
-安装脚本会按 `[n/N]` 打印每一步，任何一步失败都会明确报错并停下。重复运行是安全的（幂等）。它依次做：
+The installer prints each step as `[n/N]` and stops with a clear error if any step fails. Running it again is safe (idempotent). In order, it:
 
-1. 预检：Windows、`node` 和 `npm` 在 PATH 里、dsh 的 profile 目录存在
-2. 下载本仓库 zip，复制到安装目录 `%LOCALAPPDATA%\dsh-whale-pet`
-3. `npm install`（Electron 45.0.0，会下载约 100 MB 的二进制）
-4. 从 Live2D 官方地址下载 Cubism Core（`live2dcubismcore.min.js`）
-5. 从 [Andersen216/dsh-whale-girl-live2d](https://github.com/Andersen216/dsh-whale-girl-live2d) 的固定提交 `f977bef508690e75ba6535cd8f4ce18e7f6ba9b0` 下载 64 个模型文件（约 4.2 MB），逐个按 `assets/model-files.json` 核对 sha256
-6. 备份后，把插件配置追加到 `~\.dsh\profiles\web\cordis.patch.yml` 末尾
-7. （可选）把人设写进 `~\.dsh\AGENTS.md`
-8. 生成 `hook\dsh-hooks.json`（给想用 hook 的人，见「工作原理」）
-9. 在开始菜单建快捷方式「DSH Whale Pet」
-10. 启动桌宠
+1. Pre-checks: Windows, `node` and `npm` on PATH, dsh's profile directory exists
+2. Downloads this repo as a zip and copies it to the install directory `%LOCALAPPDATA%\dsh-whale-pet`
+3. `npm install` (Electron 45.0.0; downloads a binary of about 100 MB)
+4. Downloads the Cubism Core (`live2dcubismcore.min.js`) from Live2D's official URL
+5. Downloads the 64 model files (about 4.2 MB) from [Andersen216/dsh-whale-girl-live2d](https://github.com/Andersen216/dsh-whale-girl-live2d) at the pinned commit `f977bef508690e75ba6535cd8f4ce18e7f6ba9b0`, checking each against `assets/model-files.json` by sha256
+6. Backs up, then appends the plugin config to the end of `~\.dsh\profiles\web\cordis.patch.yml`
+7. (Optional) writes the persona into `~\.dsh\AGENTS.md`
+8. Renders `hook\dsh-hooks.json` (for people who want to use hooks; see "How it works")
+9. Creates the Start menu shortcut "DSH Whale Pet"
+10. Starts the pet
 
-所有被改动的已有文件都会先备份为 `<原文件名>.bak-dsh-whale-pet-<yyyyMMdd-HHmmss>`。网络不好（国内）的话看下面「常见问题」里的镜像设置。
+Every existing file that gets modified is first backed up as `<original name>.bak-dsh-whale-pet-<yyyyMMdd-HHmmss>`. If your network is slow (for example in mainland China), see the mirror settings in the FAQ.
 
-## 让你的 dsh 帮你装
+### Let your dsh install it
 
-不想自己敲命令？把下面这两句直接发给 dsh：
+Don't want to type commands? Send these two lines to dsh:
 
 ```
 https://github.com/Dylan3589277/dsh-whale-pet
 帮我装这个
 ```
 
-dsh 会读仓库里的 [INSTALL.md](INSTALL.md)（它是写给 AI 智能体看的安装说明），先告诉你要下载和改动什么、问你要不要可爱人设，然后替你执行安装并检查结果。
+(The second line means "install this for me".) dsh reads [INSTALL.md](INSTALL.md) in the repo (installation instructions written for AI agents), tells you what it will download and change, asks whether you want the cute persona, then runs the install and checks the result.
 
-## 使用
-
-- **拖动**：左键按住拖。松手后位置会记住（保存在 `%APPDATA%\dsh-whale-pet\pet-position.json`），下次启动还在原处；第一次默认在主屏右下角。
-- **戳她**：单击 = 戳她一下，她会生气 1.5 秒，然后回到原来的状态。
-- **右键菜单**：「打开 dsh」（用浏览器打开 `http://127.0.0.1:3080`）/「退出」。
-- **点穿**：窗口透明的地方鼠标直接穿透，不会挡住后面的程序；只有鼠标在她身上时才响应。
-- **视线**：她的眼睛会跟着鼠标转，鼠标在屏幕任何地方都行。
-- **只会有一只**：重复启动会直接退出。
-- 开始菜单搜「DSH Whale Pet」可以随时重新启动她。
-
-## 她会对什么有反应
-
-dsh 的插件把运行时事件翻译成"宠物事件"发给她。下面是 dsh 事件和宠物事件的对应关系（按 dsh 0.2.1 的运行时事件整理）：
-
-| 宠物事件 | dsh 事件 |
-|---|---|
-| `SessionStart` | `agent/created`（根智能体） |
-| `UserPromptSubmit` | `session/event` 里的 `user/message`；没有用户消息的自动唤醒用 `agent/status running` 补 |
-| `PreToolUse` / `PostToolUse` | `tools/pre-execute` / `tools/post-execute`（带 `tool_name`；子分身的工具并入根会话） |
-| `Stop` | `agent/status idle`（根智能体） |
-| `SubagentStart` / `SubagentStop` | `subagent/start` / `subagent/end` |
-| `WaitingApproval` | `approval/request`（等你批准） |
-| `WaitingAnswer` | `user-questions/request`（等你回答） |
-| `Resume` | 上面两种请求被答复后（并行多个时全部答完才发） |
-| `Error` | `agent/error`（重试用尽后的最终失败；会自动重试的 `agent/request-error` 不报） |
-
-### 状态机
-
-按会话（`session_id`）分别记状态，多个会话合并时的优先级是：error > waiting > working > received > done > sleepy / idle。
-
-- 收到你的消息 → **received**（「收到！」，问号表情），1.5 秒内没有工具事件就转 **working**（「想一想…」）
-- 工具执行前后 → **working**，气泡按工具类别：命令「在跑命令…」/ 改文件「在改文件…」/ 读搜「在翻资料…」/ 上网「在上网查…」/ 分身类「在派分身…」/ 计划「在列计划…」/ 其它「干活中…」
-- 一轮结束 → **done**（「搞定啦！」，跳两下 + ✨），8 秒后回 **idle**
-- 干活超过 15 分钟没有任何事件 → idle；idle 满 30 分钟 → **sleepy**（Zzz）
-- 等你批准 → **waiting**（「等你批准~」），等你回答 → **waiting**（「有问题问你~」），气泡变黄，轻晃加小跳；等待期间并行工具的事件不会抢走状态；答复后回 working（「继续干活…」）；2 小时没动静 → idle
-- 出错 → **error**（「出错啦！」，抖 1.6 秒，气泡变红）；紧跟着的 Stop 不会盖掉它；8 秒没有新事件 → idle，来了新的工作事件 → working
-- 两个及以上会话同时干活（或同时在等），气泡前面加 `×N `；有子分身在跑，气泡后面加 `(分身×N)`
-
-### 状态 → 表情 / 动作
-
-每个状态有几套表现，切进来时随机挑一套，不会连着两次挑同一套。表情是模型表情参数的叠加，0.35 秒淡入淡出。
-
-| 状态 | 表现 |
-|---|---|
-| idle | 只有待机动作（呼吸、眨眼、头发裙摆尾巴的物理摆动）。每 15–40 秒随机来一个小动作（共 23 个，几秒后自己复原）：星星眼 / 脸红 / 心跳 / 调皮 / 爱心眼 / 吐舌 / 喵喵手；戴墨镜 / 摘头箍 / 单边马尾 / 兔兔·猫猫·蝴蝶结贴纸 / 偷吃巴菲 / 端出蛋包饭 / 换深色桌布 / 小鲸鱼趴桌上；快速自拍、头上小鲸鱼冒出来喷水、白手机自拍、翻开翻盖手机、蛋包饭挤番茄酱、吹泡泡糖 |
-| received | 闪感叹号 + 星星眼，或闪感叹号 + 开心兴奋 |
-| working | 拿起画笔，戴圆 / 方 / 椭圆眼镜之一（有时桌上多一罐魔爪），隔一会儿点一下笔，偶尔点亮桌面的撤回 / 橡皮图标，视线往下看 |
-| waiting | 问号，或问号 + 流汗，或问号 + 呆呆眼 |
-| done | 开心兴奋 + 比耶 / 冒爱心 / 小鲸鱼喷水 / 身边转出一圈花 的几种组合 |
-| sleepy | 闭眼流口水，偶尔吐魂、流汗或续一罐白魔爪 |
-| error | 哭 / 悲伤 / 晕晕 / 阴暗 + 流汗 四选一 |
-| angry（被戳） | 生气 + 喵喵手（有时加感叹号），或挨一玩具锤（起包、晕眼，动作播完为止），1.5 秒后回到原状态 |
-
-## 工作原理
-
-```
-dsh 运行时 ──(dsh-plugin：原生 cordis 插件)──▶ POST http://127.0.0.1:47824/event
-                                                      │
-                                         桌宠主进程（Electron：状态机 + 窗口）
-                                                      │
-                                         渲染进程（Live2D 画面 + 气泡）
-```
-
-安装脚本把 `dsh-plugin/` 登记到 dsh 的 web profile，dsh 在运行时事件（智能体创建、工具执行、批准请求、提问、出错……）发生时，由插件把它们 POST 给桌宠。web profile 是 `patchReload: live`，保存配置即热加载，通常不用重启 DSH Desktop；如果装完后她没反应，重启一次 DSH Desktop。
-
-桌宠主进程只监听 `127.0.0.1`（不对外网开放），提供三个接口：
-
-| 接口 | 作用 |
-|---|---|
-| `POST /event` | 接收事件（JSON，Claude Code hooks 风格：`hook_event_name`、`session_id`、可选 `tool_name`），返回 204。只收 `Content-Type: application/json` |
-| `GET /state` | 当前聚合状态和各会话状态，调试用 |
-| `POST /debug/snapshot` | body 形如 `{"path":"<绝对路径>\\x.png"}`，把桌宠窗口截成透明 PNG，调试用 |
-
-默认端口 `47824`。被占用时不会自动换端口：桌宠打印原因并以退出码 1 退出。要换端口，宠物、插件（和 hook）两边都设同名环境变量 `DSH_PET_PORT`（插件也可以在 `cordis.patch.yml` 里的 config 写 `port`）。
-
-**对 dsh 智能体的影响**：插件的 POST 是即发即忘（不等待、500 ms 硬超时、异常全部吞掉）；监听器先发事件再原样 `return next()`，不改动任何数据，批准和提问的返回值保持原样；插件自身出错只写 dsh 日志（限频）。
-
-### 想用 hook 而不是插件？
-
-`hook/pet-hook.js` 是 Claude Code hooks 风格的命令行 hook，注册 7 个事件（SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / Stop / SubagentStart / SubagentStop）。用 `@deepseek-ai/dsh-hooks-claude-code`（或 Claude Code）的人，可以把它的 `configPath` 指向安装后渲染出来的 `%LOCALAPPDATA%\dsh-whale-pet\hook\dsh-hooks.json`。hook 拿不到「等你批准 / 等你回答 / 出错」三种状态，所以默认走插件。**插件和 hook 不要同时启用**，否则事件会重复。hook 脚本自己 800 ms 超时、永远 `exit 0`、不往 stdout 输出任何东西。
-
-### 渲染（Live2D）
-
-- 画面：PIXI.js 6.5.10 + pixi-live2d-display 0.4.0（只含 Cubism 4 运行时）+ Live2D 官方 Cubism Core。约 30 fps 封顶，窗口不可见时整条渲染循环停掉。
-- 点穿：窗口默认鼠标穿透；每帧渲染后读取光标周围 9×9 像素，透明度超过阈值才算"在她身上"，才响应鼠标。按住左键拖动期间保持响应，松手后再按位置判断。
-- 视线：主进程每 50 ms 读一次全局光标位置，传给页面做头部和眼睛跟随。
-- CSP：`default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self'`。`'unsafe-eval'` 是因为 PIXI 6 编译着色器会用 `new Function`；`connect-src 'self'` 是因为 pixi-live2d-display 要用 fetch / XHR 读本地的模型文件。脚本来源仍然只有 `'self'`，不加载任何外部地址。开发模式下 Electron 会因此打一条「Insecure Content-Security-Policy」警告，属正常现象。
-- 如果 Live2D 起不来（缺 Cubism Core、没有 WebGL、模型 12 秒没加载完），她会弹出一个简短的纯文字提示（窗口仍可拖动，右键 → 退出），建议重新运行 `install.ps1`。
-
-## 可选人设
-
-装的时候加 `DSH_PET_PERSONA=1`，安装脚本会把 [persona/persona.md](persona/persona.md) 的内容写进 `~\.dsh\AGENTS.md`（dsh 会把 `~/.dsh/AGENTS.md` 当作用户全局指令加载）。**这会改变智能体的说话方式**：变成同款蓝发女仆鲸尾娘的元气口吻，会用语气词、颜文字和少量网络用语。
-
-- 只改语气，不改内容：事实、命令、代码、报错原文、坏消息一律照实说；代码块和文件内容里不加任何语气装饰。
-- 人设写在带标记的块里（`<!-- >>> dsh-whale-pet persona -->` … `<!-- <<< dsh-whale-pet persona -->`），卸载脚本只会删这个块，不碰你自己写的内容。
-- 在**新的对话**里生效，已经开着的对话不受影响。
-- 如果装了 dsh-meme 贴纸插件（有 `send_meme` 工具），人设会按规则偶尔配一张表情包；没装就用颜文字。
-- 不想要了：删掉 `AGENTS.md` 里这个标记块，或运行卸载脚本。你也可以直接编辑块里的内容改成自己喜欢的风格。
-
-## 环境变量
-
-安装脚本（`install.ps1`）读取：
-
-| 变量 | 默认值 | 作用 |
-|---|---|---|
-| `DSH_HOME` | `~\.dsh` | dsh 的数据目录（与 dsh 自己认的是同一个变量） |
-| `DSH_PET_PROFILE` | `web` | 要接入的 dsh profile 名 |
-| `DSH_PET_HOME` | `%LOCALAPPDATA%\dsh-whale-pet` | 桌宠安装目录 |
-| `DSH_PET_SRC` | （空） | 本地文件夹或 zip，用于离线安装，不再从 GitHub 下载本仓库 |
-| `DSH_PET_ZIP_URL` | GitHub 上本仓库的 zip | 换成镜像地址 |
-| `DSH_PET_MODEL_BASE` | 上游仓库的 raw 地址 | 模型文件的 raw 基础 URL，用于镜像 |
-| `DSH_PET_CORE_URL` | Live2D 官方地址 | Cubism Core 的下载地址 |
-| `DSH_PET_PERSONA` | （空） | 设为 `1` 同时安装可爱人设 |
-| `DSH_PET_SKIP_PLUGIN` | （空） | 设为 `1` 不修改 `cordis.patch.yml`（例如你想改用 hook） |
-| `DSH_PET_SHORTCUT_DIR` | 开始菜单程序目录 | 快捷方式放在哪 |
-| `DSH_PET_NO_START` | （空） | 设为 `1` 装完不自动启动桌宠 |
-
-运行时读取：
-
-| 变量 | 默认值 | 作用 |
-|---|---|---|
-| `DSH_PET_PORT` | `47824` | 桌宠、插件、hook 共用的事件端口，三处必须一致 |
-
-## 卸载
+## Uninstall
 
 ```powershell
 irm https://raw.githubusercontent.com/Dylan3589277/dsh-whale-pet/main/uninstall.ps1 | iex
 ```
 
-或者用已安装的那份：
+Or use the installed copy:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\dsh-whale-pet\uninstall.ps1"
 ```
 
-卸载会：停掉桌宠；移除安装脚本写入的带标记的配置块（`cordis.patch.yml` 里的插件块、`AGENTS.md` 里的人设块，改之前同样先备份），你自己的其它内容不动；删除开始菜单快捷方式、安装目录（只在它确实是 dsh-whale-pet 时才删）和 Electron 用户数据目录 `%APPDATA%\dsh-whale-pet`（记住的窗口位置）。重复运行是安全的。
+Uninstalling: stops the pet; removes the marked config blocks that the installer wrote (the plugin block in `cordis.patch.yml` and the persona block in `AGENTS.md`, backed up first in the same way), leaving everything else you wrote untouched; deletes the Start menu shortcut, the install directory (only if it really is dsh-whale-pet) and the Electron user data directory `%APPDATA%\dsh-whale-pet` (the remembered window position). Running it again is safe.
 
-## 常见问题
+## Environment variables
 
-**装完她没反应。** 先确认桌宠在跑：`Invoke-RestMethod http://127.0.0.1:47824/state` 能返回内容。然后检查 `~\.dsh\profiles\web\cordis.patch.yml` 里有一段 `id: dsh-pet-bridge`。再给 dsh 发一条消息试试；仍然没反应就重启 DSH Desktop。
+Read by the installer (`install.ps1`):
 
-**提示端口被占用，桌宠退出了。** 可能已经有另一只在跑，或者别的程序占了 47824。换一个端口，并在 dsh 和桌宠两边都设置同样的值（先 `setx DSH_PET_PORT 47900`，再重启 DSH Desktop 和桌宠）。
+| Variable | Default | Purpose |
+|---|---|---|
+| `DSH_HOME` | `~\.dsh` | dsh's data directory (the same variable dsh itself uses) |
+| `DSH_PET_PROFILE` | `web` | Name of the dsh profile to hook into |
+| `DSH_PET_HOME` | `%LOCALAPPDATA%\dsh-whale-pet` | Install directory of the pet |
+| `DSH_PET_SRC` | (empty) | A local folder or zip for offline install; skips downloading this repo from GitHub |
+| `DSH_PET_ZIP_URL` | this repo's zip on GitHub | Replace with a mirror URL |
+| `DSH_PET_MODEL_BASE` | raw URL of the upstream repo | Base raw URL of the model files, for mirrors |
+| `DSH_PET_CORE_URL` | Live2D's official URL | Download URL of the Cubism Core |
+| `DSH_PET_PERSONA` | (empty) | Set to `1` to also install the cute persona |
+| `DSH_PET_SKIP_PLUGIN` | (empty) | Set to `1` to leave `cordis.patch.yml` untouched (for example if you want to use hooks instead) |
+| `DSH_PET_SHORTCUT_DIR` | Start menu programs directory | Where the shortcut goes |
+| `DSH_PET_NO_START` | (empty) | Set to `1` to not start the pet after installing |
 
-**屏幕上出现一个提示框，说 Live2D 起不来。** Cubism Core 或模型文件没下载成功。重新运行 `install.ps1`（幂等，会补齐缺的文件）。
+Read at runtime:
 
-**`npm install` 或 Electron 下载很慢 / 失败。** 国内网络可以先换镜像：
+| Variable | Default | Purpose |
+|---|---|---|
+| `DSH_PET_PORT` | `47824` | Event port shared by the pet, the plugin and the hook; all three must agree |
+
+## How it works
+
+```
+dsh runtime ──(dsh-plugin: native cordis plugin)──▶ POST http://127.0.0.1:47824/event
+                                                          │
+                                           pet main process (Electron: state machine + window)
+                                                          │
+                                           renderer process (Live2D canvas + bubble)
+```
+
+The installer registers `dsh-plugin/` in dsh's web profile. When dsh runtime events happen (agent created, tool execution, approval request, question, error...), the plugin POSTs them to the pet. The web profile is `patchReload: live`, so saving the config hot-reloads it and you normally do not need to restart DSH Desktop; if she does not react after installing, restart DSH Desktop once.
+
+The pet's main process listens on `127.0.0.1` only (not exposed to the network) and offers three endpoints:
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /event` | Receives events (JSON in Claude Code hooks style: `hook_event_name`, `session_id`, optional `tool_name`), returns 204. Only accepts `Content-Type: application/json` |
+| `GET /state` | The current aggregated state and per-session states, for debugging |
+| `POST /debug/snapshot` | Body like `{"path":"<absolute path>\\x.png"}`; captures the pet window as a transparent PNG, for debugging |
+
+The default port is `47824`. If it is taken, the pet does not pick another one automatically: it prints the reason and exits with code 1. To change the port, set the same `DSH_PET_PORT` environment variable on both sides, the pet and the plugin (and the hook); the plugin can also take `port` in its config in `cordis.patch.yml`.
+
+**Impact on the dsh agent**: the plugin's POST is fire-and-forget (no waiting, 500 ms hard timeout, all exceptions swallowed); the listeners send the event first and then return `next()` unchanged, never modifying any data, so approval and question return values stay as they were; the plugin's own errors are only written to the dsh log (rate-limited).
+
+### Want hooks instead of the plugin?
+
+`hook/pet-hook.js` is a command-line hook in Claude Code hooks style. It registers 7 events (SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / Stop / SubagentStart / SubagentStop). If you use `@deepseek-ai/dsh-hooks-claude-code` (or Claude Code), point its `configPath` at the rendered `%LOCALAPPDATA%\dsh-whale-pet\hook\dsh-hooks.json`. Hooks cannot see the three states "waiting for approval / waiting for your answer / error", which is why the plugin is the default. **Do not enable the plugin and the hook at the same time**, or events will be duplicated. The hook script has its own 800 ms timeout, always `exit 0`, and prints nothing to stdout.
+
+### Rendering (Live2D)
+
+- Graphics: PIXI.js 6.5.10 + pixi-live2d-display 0.4.0 (Cubism 4 runtime only) + Live2D's official Cubism Core. Capped at about 30 fps; the whole render loop stops when the window is not visible.
+- Click-through: the window ignores the mouse by default. After each rendered frame, the 9x9 pixels around the cursor are read back, and only if their alpha is above a threshold does it count as "on her" and the mouse is handled. While the left button is held for dragging, the window stays responsive; after release it goes back to per-position checks.
+- Gaze: the main process reads the global cursor position every 50 ms and passes it to the page for head and eye tracking.
+- CSP: `default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self'`. `'unsafe-eval'` is there because PIXI 6 compiles shaders with `new Function`; `connect-src 'self'` is there because pixi-live2d-display reads the local model files with fetch / XHR. Scripts still come only from `'self'`, and no external address is loaded. In development mode Electron prints an "Insecure Content-Security-Policy" warning because of this; that is normal.
+- If Live2D cannot start (Cubism Core missing, no WebGL, or the model has not loaded within 12 s), she shows a short plain-text notice (the window can still be dragged; right-click, then quit) suggesting you rerun `install.ps1`.
+
+## Optional persona
+
+Install with `DSH_PET_PERSONA=1` and the installer writes the contents of [persona/persona.md](persona/persona.md) into `~\.dsh\AGENTS.md` (dsh loads `~/.dsh/AGENTS.md` as your global user instructions). **This changes how the agent talks**: it takes on the same energetic tone as the blue-haired maid whale girl, with interjections, kaomoji and a little internet slang.
+
+- It changes tone only, not content: facts, commands, code, error messages verbatim and bad news are always stated truthfully; no tone decoration is ever added inside code blocks or file contents.
+- The persona lives in a marked block (`<!-- >>> dsh-whale-pet persona -->` ... `<!-- <<< dsh-whale-pet persona -->`); the uninstaller removes only that block and never touches what you wrote yourself.
+- It takes effect in **new conversations**; conversations that are already open are not affected.
+- If the dsh-meme sticker plugin (the `send_meme` tool) is installed, the persona occasionally adds a sticker according to its rules; without it, kaomoji are used.
+- To remove it: delete this marked block from `AGENTS.md`, or run the uninstaller. You can also edit the contents of the block into a style you like better.
+
+## FAQ
+
+**She does not react after installing.** First check that the pet is running: `Invoke-RestMethod http://127.0.0.1:47824/state` should return something. Then check that `~\.dsh\profiles\web\cordis.patch.yml` contains a section with `id: dsh-pet-bridge`. Then send dsh a message; if there is still no reaction, restart DSH Desktop.
+
+**It says the port is in use and the pet exited.** Another copy may already be running, or another program holds 47824. Pick a different port and set the same value on both the dsh side and the pet side (`setx DSH_PET_PORT 47900`, then restart DSH Desktop and the pet).
+
+**A box on screen says Live2D could not start.** The Cubism Core or the model files did not download successfully. Rerun `install.ps1` (it is idempotent and fills in missing files).
+
+**`npm install` or the Electron download is very slow / fails.** On networks in mainland China you can switch to a mirror first:
 
 ```powershell
 $env:ELECTRON_MIRROR='https://npmmirror.com/mirrors/electron/'
 npm config set registry https://registry.npmmirror.com
 ```
 
-GitHub 访问不顺的话，可以用 `DSH_PET_ZIP_URL`、`DSH_PET_MODEL_BASE` 指向你自己的镜像。
+If GitHub is hard to reach, point `DSH_PET_ZIP_URL` and `DSH_PET_MODEL_BASE` at your own mirror.
 
-**提示"禁止运行脚本"。** 用文档里的 `irm ... | iex` 不受执行策略影响；如果是运行 `.ps1` 文件，用 `powershell -ExecutionPolicy Bypass -File ...`。
+**"Running scripts is disabled."** The `irm ... | iex` form used in this document is not affected by the execution policy; if you run a `.ps1` file, use `powershell -ExecutionPolicy Bypass -File ...`.
 
-**DSH Desktop 升级后她不动了。** 先检查 `cordis.patch.yml` 里的 `dsh-pet-bridge` 块还在不在（它在 `~\.dsh` 里，正常不受升级影响）；人设同理看 `AGENTS.md`。不在就重新运行安装脚本。
+**She stopped moving after DSH Desktop was upgraded.** First check whether the `dsh-pet-bridge` block is still in `cordis.patch.yml` (it lives in `~\.dsh`, so upgrades normally do not affect it); for the persona, check `AGENTS.md` the same way. If it is gone, rerun the installer.
 
-**她会拖慢电脑吗？** 画面约 30 fps 封顶，窗口不可见时停止渲染。因为透明窗口要每帧回读像素来判断点穿，所以会有一点 CPU / GPU 占用；不放心可以随时右键退出。
+**Will she slow my computer down?** Rendering is capped at about 30 fps and stops when the window is not visible. Because a transparent window has to read pixels back every frame to decide click-through, there is some CPU / GPU use; if you are worried, right-click and quit at any time.
 
-## 平台
+## Platform
 
-目前只支持 **Windows**（安装脚本是 PowerShell）。macOS / Linux 没有测试过；桌宠本体是 Electron，理论上可以移植，欢迎 PR。
+**Windows** only for now (the installer is PowerShell). macOS / Linux have not been tested; the pet itself is Electron, so porting should be possible in theory, and PRs are welcome.
 
-## 不随仓库提供的东西
+## Not shipped in this repo
 
-- **Live2D Cubism Core**：Live2D Inc. 的专有软件，安装时从官方地址下载，不再分发。
-- **Live2D 模型文件**：安装时从上游仓库的固定提交下载。
-- **早期的网格动画回落用的贴纸图**：没有再分发许可，不包含。高级用法：自己在 `assets/sprites.json` 里放图（格式 `{ "<状态名>": {"files": ["sprites/x.png"], "anim": "..."} }`，文件路径相对 `assets/`），并在 `assets/` 下放对应图片，在 Live2D 起不来时会回落到 WebGL 网格动画。
+- **Live2D Cubism Core**: proprietary software of Live2D Inc., downloaded from the official URL at install time and not redistributed.
+- **Live2D model files**: downloaded at install time from a pinned commit of the upstream repository.
+- **Sticker images for the earlier mesh-animation fallback**: no redistribution license, so they are not included. Advanced use: put your own images under `assets/` and describe them in `assets/sprites.json` (format `{ "<state name>": {"files": ["sprites/x.png"], "anim": "..."} }`, file paths relative to `assets/`); they are used for a WebGL mesh animation fallback when Live2D cannot start.
 
-## 许可与署名
+## License & attribution
 
-- 本仓库的代码与文档：[MIT](LICENSE)。
-- Live2D 模型（DS 鲸鱼娘 `c_0120`）：**CC BY-NC-SA 4.0，仅限非商业**。角色原作 上善无形（原创「溟月」）、女仆鲸鱼娘二次设计 ZipZipPipe、Live2D 模型制作 氵六青。安装时从 [Andersen216/dsh-whale-girl-live2d](https://github.com/Andersen216/dsh-whale-girl-live2d) 下载，本仓库不含、不改动模型文件。
-- Live2D Cubism Core：© Live2D Inc.，专有许可，使用者自行遵守其条款。
-- PIXI.js 6.5.10、pixi-live2d-display 0.4.0、Electron：MIT。
+- Code and docs of this repo: [MIT](LICENSE).
+- Live2D model (DS whale girl `c_0120`): **CC BY-NC-SA 4.0, non-commercial only**. Original character by 上善无形 (original character "溟月"), maid whale-girl redesign by ZipZipPipe, Live2D rigging by 氵六青. Downloaded at install time from [Andersen216/dsh-whale-girl-live2d](https://github.com/Andersen216/dsh-whale-girl-live2d); this repo neither contains nor modifies the model files.
+- Intro images in `docs/intro/` (screenshots of the model and illustrations derived from it): CC BY-NC-SA 4.0, not covered by the MIT license of the code. The layout and text of the poster (`intro.html`) are MIT.
+- Live2D Cubism Core: (c) Live2D Inc., proprietary license; you are responsible for complying with its terms.
+- PIXI.js 6.5.10, pixi-live2d-display 0.4.0, Electron: MIT.
 
-完整说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。**请勿将这只桌宠（含模型）用于商业用途。**
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the full details. **Do not use this pet (including the model) for commercial purposes.**
