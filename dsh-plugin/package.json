@@ -1,0 +1,16 @@
+{
+  "name": "dsh-pet-bridge",
+  "description": "把 dsh 智能体的实时状态推给本机桌宠 dsh-pet（原生 cordis 插件，只用 Node 内置模块）。",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "dsh": ">=0.2.1-rc.2 <0.3.0"
+  }
+}

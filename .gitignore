@@ -1,0 +1,5 @@
+node_modules/
+renderer/vendor/live2dcubismcore.min.js
+assets/live2d/
+assets/sprites/
+assets/sprites.json

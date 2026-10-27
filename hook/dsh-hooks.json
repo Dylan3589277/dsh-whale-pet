@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "SubagentStart": [
+      { "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ],
+    "SubagentStop": [
+      { "hooks": [ { "type": "command", "command": "node \"__PET_DIR__/hook/pet-hook.js\"", "timeout": 3 } ] }
+    ]
+  }
+}

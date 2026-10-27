@@ -1,0 +1,326 @@
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* WebGL 画布：人物按网格变形画在这里（renderer.js）。原点 = 画布底边往上 6px 的中点，对齐 #stage 的脚底 */
+#gl {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 300px;
+  pointer-events: none;
+}
+/* 泡泡/水花粒子层：纯装饰，不吃鼠标 */
+#particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+#particles span {
+  position: absolute;
+  pointer-events: none;
+}
+
+#stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  justify-content: center;
+}
+
+#pet {
+  display: block;
+  max-width: 300px;
+  max-height: 240px;
+  transform-origin: 50% 100%;
+  -webkit-user-drag: none;
+}
+
+#bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 284px;
+  transform: translateX(-50%);
+  max-width: 260px;
+  padding: 7px 14px;
+  border-radius: 14px;
+  background: #fff;
+  color: #1d3a7a;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+}
+
+#bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-bottom: 0;
+  border-top-color: #fff;
+}
+
+/* 等批准/出错的气泡换色，一眼能看出来要她理 */
+#bubble[data-state="waiting"] { background: #fff3c4; color: #7a4b00; }
+#bubble[data-state="waiting"]::after { border-top-color: #fff3c4; }
+#bubble[data-state="error"] { background: #ffe0e0; color: #a01616; }
+#bubble[data-state="error"]::after { border-top-color: #ffe0e0; }
+
+#sprite {
+  transform-origin: 50% 100%;
+}
+/* WebGL 正常时 <img> 只当鼠标命中区（透明，但照样收 mouseenter/mousedown/右键），人物由 #gl 画 */
+body.gl #pet {
+  opacity: 0;
+  animation: none !important;
+}
+/* 回落模式（WebGL 不可用）换图只淡入，不再跳 */
+body:not(.gl) #sprite.swap { animation: swap 0.4s ease-out; }
+
+/* 状态点缀：都是纯装饰，不吃鼠标（穿透开关只看 #pet） */
+.fx {
+  position: absolute;
+  pointer-events: none;
+}
+.fx[hidden] { display: none !important; }
+
+#sparkle {
+  top: 10px;
+  right: 24px;
+  font-size: 26px;
+  animation: twinkle 0.9s ease-in-out infinite;
+}
+
+/* sleepy：Z z z 往右上飘 */
+#zzz {
+  left: calc(50% + 46px);
+  top: 6px;
+  width: 50px;
+  height: 60px;
+  font-weight: 700;
+  font-style: italic;
+  color: #4a6fd6;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff;
+}
+#zzz b {
+  position: absolute;
+  left: 0;
+  top: 36px;
+  opacity: 0;
+  animation: zfloat 3.6s ease-in-out infinite;
+}
+#zzz b:nth-child(1) { font-size: 14px; }
+#zzz b:nth-child(2) { font-size: 18px; animation-delay: 1.2s; }
+#zzz b:nth-child(3) { font-size: 22px; animation-delay: 2.4s; }
+
+/* waiting：问号弹跳 */
+#ask {
+  left: calc(50% + 62px);
+  top: 0;
+  font-size: 34px;
+  font-weight: 800;
+  color: #f2a900;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  animation: ask-bounce 1.1s ease-in-out infinite;
+}
+
+/* working：三个小点轮流跳，像「正在输入」 */
+#dots {
+  left: calc(50% + 52px);
+  top: 4px;
+  display: flex;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+#dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4a6fd6;
+  animation: dot-bounce 1.1s ease-in-out infinite;
+}
+#dots i:nth-child(2) { animation-delay: .15s; }
+#dots i:nth-child(3) { animation-delay: .3s; }
+
+/* error：额头冒汗滴下来。💦 是浅蓝色，压在蓝头发上会看不见 → 加白描边、放大、挪到头右上侧，不透明时间拉长 */
+#sweat {
+  left: calc(50% + 50px);
+  top: 18px;
+  font-size: 26px;
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 1px 2px rgba(0, 40, 120, .45));
+  animation: sweat-drip 2s ease-in infinite;
+}
+
+/* 回落模式（WebGL 不可用）才用这些：整张贴纸只做轻呼吸/轻摆，不再上下蹦 */
+.anim-idle { animation: idle 4s ease-in-out infinite; }
+.anim-received { animation: received 0.6s ease-out; }
+.anim-working { animation: working 2.6s ease-in-out infinite; }
+.anim-done { animation: done 2.4s ease-in-out infinite; }
+.anim-angry { animation: angry 0.5s ease-out; }
+.anim-sleepy { animation: sleepy 6s ease-in-out infinite; }
+.anim-waiting { animation: waiting 3.2s ease-in-out infinite; }
+.anim-error { animation: angry 0.5s ease-out; }
+
+@keyframes idle {
+  0%, 100% { transform: scaleY(1) rotate(0); }
+  25% { transform: scaleY(1.01) rotate(.4deg); }
+  50% { transform: scaleY(1) rotate(0); }
+  75% { transform: scaleY(1.01) rotate(-.4deg); }
+}
+@keyframes received {
+  0% { transform: scaleY(1); }
+  40% { transform: scaleY(1.03); }
+  70% { transform: scaleY(.99); }
+  100% { transform: scaleY(1); }
+}
+@keyframes working {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.012); }
+}
+@keyframes done {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(1.5deg); }
+  75% { transform: rotate(-1.5deg); }
+}
+@keyframes angry {
+  0%, 100% { transform: none; }
+  15% { transform: translateX(-3px); }
+  35% { transform: translateX(2px); }
+  55% { transform: translateX(-1px); }
+}
+@keyframes waiting {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-1.2deg); }
+  75% { transform: rotate(1.2deg); }
+}
+@keyframes sleepy {
+  0%, 100% { transform: scaleY(1); opacity: .9; }
+  50% { transform: scaleY(1.02); opacity: .8; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.8); }
+}
+@keyframes swap {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes zfloat {
+  0% { opacity: 0; transform: translate(0, 0) scale(.7); }
+  20% { opacity: .85; }
+  80% { opacity: .6; }
+  100% { opacity: 0; transform: translate(18px, -34px) scale(1.1); }
+}
+@keyframes ask-bounce {
+  0%, 100% { transform: translateY(0) rotate(8deg); }
+  40% { transform: translateY(-12px) rotate(8deg); }
+  60% { transform: translateY(0) scale(1.1, .9) rotate(8deg); }
+}
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: .45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes sweat-drip {
+  0% { opacity: 0; transform: translateY(-4px) scale(.8); }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(22px) scale(1); }
+}
+
+/* idle：头顶冒小泡泡（renderer.js 生成，--s 大小 / --dx 横漂 / --up 上升高度） */
+#particles .bubble {
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .9);
+  background: radial-gradient(circle at 32% 30%, rgba(255, 255, 255, .95) 0 16%, rgba(200, 230, 255, .35) 38%, rgba(110, 170, 250, .2) 72%);
+  box-shadow: 0 0 0 .5px rgba(50, 120, 220, .6), 0 0 3px rgba(40, 100, 210, .45), inset 0 0 2px rgba(40, 100, 210, .35);
+  opacity: 0;
+  animation: bubble-rise 2.6s ease-out forwards;
+}
+@keyframes bubble-rise {
+  0% { opacity: 0; transform: translate(0, 0) scale(.4); }
+  15% { opacity: .95; }
+  50% { transform: translate(calc(var(--dx) * .4), calc(var(--up) * -.55)) scale(1); }
+  80% { opacity: .8; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--up) * -1)) scale(1.1); }
+}
+
+/* done：头顶喷一小簇水花，和 ✨ 叠着 */
+#particles .drop {
+  width: 5px;
+  height: 7px;
+  margin: -3px 0 0 -2px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: linear-gradient(#f2faff, #74b8ff);
+  box-shadow: 0 0 1px #2a6fd0;
+  opacity: 0;
+  animation: spout 1.15s cubic-bezier(.25, .7, .45, 1) forwards;
+}
+@keyframes spout {
+  0% { opacity: 0; transform: translate(0, 0) scale(.6); }
+  10% { opacity: 1; }
+  45% { transform: translate(calc(var(--dx) * .55), calc(var(--up) * -1)) scale(1); }
+  75% { opacity: .9; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--up) * -.3)) scale(.8); }
+}
+
+/* ===== Live2D 模式（live2d.js 起来后 body 加 .l2d）=====
+   人物画在 #l2d（整窗透明画布），鼠标命中按像素 alpha 判，不再用 <img>；#gl / <img> 都不显示。
+   头顶位置由 renderer.js 写进 --hx / --hy（窗口 CSS px），气泡和特效都跟着它摆 */
+#l2d {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+body.l2d #gl,
+body.l2d #sprite { display: none; }
+body.l2d #stage { top: 0; bottom: 0; pointer-events: none; }
+body.l2d #bubble { bottom: auto; top: calc(var(--hy) - 40px); }
+body.l2d #sparkle { right: auto; left: calc(var(--hx) + 44px); top: calc(var(--hy) - 6px); }
+body.l2d #zzz { left: calc(var(--hx) + 40px); top: calc(var(--hy) - 22px); }
+body.l2d #ask { left: calc(var(--hx) + 106px); top: calc(var(--hy) - 36px); } /* 气泡右边，别压字 */
+body.l2d #dots { left: calc(var(--hx) + 46px); top: calc(var(--hy) - 14px); }
+body.l2d #sweat { left: calc(var(--hx) + 44px); top: calc(var(--hy) - 2px); }
+
+/* ===== 提示框模式（Live2D 起不来、又没有自备贴纸 assets/sprites.json）=====
+   renderer.js showNotice() 往 #notice 里写字并给 body 加 .notice；提示框就是鼠标命中区（拖动/戳/右键菜单照常），
+   气泡挪到它上方；点缀特效不显示（它们的位置是按人物算的） */
+#notice {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  max-height: 150px;
+  overflow: hidden;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fff3c4;
+  color: #7a4b00;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-all;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+  cursor: grab;
+}
+#notice .hint { margin-top: 4px; font-weight: 700; }
+body.notice #bubble { bottom: 175px; }

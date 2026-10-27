@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self' 'unsafe-eval'; connect-src 'self'">
+  <title>dsh-pet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="l2d"></canvas>
+  <canvas id="gl"></canvas>
+  <div id="particles"></div>
+  <div id="bubble" hidden></div>
+  <div id="notice" hidden></div>
+  <div id="stage">
+    <div id="sprite"><img id="pet" alt="" draggable="false" decoding="sync"></div>
+    <span id="sparkle" class="fx" hidden>✨</span>
+    <span id="zzz" class="fx" hidden><b>Z</b><b>z</b><b>z</b></span>
+    <span id="ask" class="fx" hidden>?</span>
+    <span id="dots" class="fx" hidden><i></i><i></i><i></i></span>
+    <span id="sweat" class="fx" hidden>💦</span>
+  </div>
+  <script src="vendor/live2dcubismcore.min.js"></script>
+  <script src="vendor/pixi.min.js"></script>
+  <script src="vendor/cubism4.min.js"></script>
+  <script src="live2d.js"></script>
+  <script src="../assets/rig.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

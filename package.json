@@ -1,0 +1,14 @@
+{
+  "name": "dsh-whale-pet",
+  "version": "0.1.0",
+  "description": "Live2D whale-maid desktop pet for DSH: reacts to agent events with expressions and motions",
+  "license": "MIT",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "45.0.0"
+  }
+}
