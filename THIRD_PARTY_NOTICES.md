@@ -15,7 +15,9 @@ This repository's own code is MIT-licensed (see [LICENSE](LICENSE)) and that lic
 | 许可 | **CC BY-NC-SA 4.0**（署名-非商业性使用-相同方式共享）<https://creativecommons.org/licenses/by-nc-sa/4.0/> |
 | 署名 | 角色原作：**上善无形**（原创「溟月」）<br>女仆鲸鱼娘二次设计：**ZipZipPipe**<br>Live2D 模型制作：**氵六青**（B 站） |
 | 本仓库里有没有 | **没有**。安装时由 `install.ps1` 按 `assets/model-files.json` 下载 64 个文件（约 4.2 MB，含上游的 `NOTICE.md` / `AUTHORS.md` / `PROVENANCE.md` / `LICENSE`），逐个核对 sha256，放到安装目录的 `assets/live2d/` |
-| 是否修改 | **未修改**模型文件本身。本项目只是在运行时选择要叠加哪些表情参数（`renderer/live2d.js`），并在启动时跳过模型里不存在的参数 |
+| 是否修改 | **未修改**下载下来的模型文件本身。本项目在运行时选择要叠加哪些表情参数（`renderer/live2d.js`），并在启动时跳过模型里不存在的参数；另外在加载时把下面「自制动作」并进动作列表（只改内存里的配置，不改磁盘上的 `model3.json`） |
+
+**自制动作（2026-10-30 起）**：`assets/motions/` 下的 10 个 `*.motion3.json`（nod、shakeHead、tiltWink、lookAround、sway、tailWag、catBeckon、startle、yawn、dozeNod）是本项目自己手写的关键帧曲线，驱动上面模型的头部角度、眼、眉、嘴、尾巴/翅膀物理输入和猫手参数，不含上游动作文件的内容。它们是对该模型的**衍生作品**，同样按 **CC BY-NC-SA 4.0** 发布（非商业、相同方式共享），署名与上面一致；不适用本仓库代码的 MIT 许可。
 
 要点：
 
@@ -49,4 +51,4 @@ This repository's own code is MIT-licensed (see [LICENSE](LICENSE)) and that lic
 
 ---
 
-*English summary:* Live2D model "c_0120" is by 上善无形 (original character 溟月), ZipZipPipe (maid whale-girl redesign) and 氵六青 (Live2D rigging), licensed CC BY-NC-SA 4.0 (non-commercial, share-alike); it is downloaded at install time from the upstream repository at the pinned commit above and is not redistributed or modified here. The intro images under `docs/intro/` (screenshots of the model and AI artwork derived from it) are derivative works and are licensed CC BY-NC-SA 4.0, not MIT. Live2D Cubism Core is © Live2D Inc. under its proprietary license, downloaded from the official URL and never redistributed — you are responsible for complying with Live2D's terms. PIXI.js 6.5.10, pixi-live2d-display 0.4.0 and Electron are MIT-licensed.
+*English summary:* Live2D model "c_0120" is by 上善无形 (original character 溟月), ZipZipPipe (maid whale-girl redesign) and 氵六青 (Live2D rigging), licensed CC BY-NC-SA 4.0 (non-commercial, share-alike); it is downloaded at install time from the upstream repository at the pinned commit above and is not redistributed or modified here. The 10 motion files under `assets/motions/` (added 2026-10-30) are hand-authored by this project against that model's parameters, are derivative works, and are licensed CC BY-NC-SA 4.0 (not MIT). The intro images under `docs/intro/` (screenshots of the model and AI artwork derived from it) are derivative works and are licensed CC BY-NC-SA 4.0, not MIT. Live2D Cubism Core is © Live2D Inc. under its proprietary license, downloaded from the official URL and never redistributed — you are responsible for complying with Live2D's terms. PIXI.js 6.5.10, pixi-live2d-display 0.4.0 and Electron are MIT-licensed.

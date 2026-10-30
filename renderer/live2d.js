@@ -68,6 +68,7 @@
   };
 
   // 一次性动作结束后会把参数停在最后一帧（比如自拍完手机一直举着），这些参数在动作结束后缓回默认值
+  const HEAD_RESET = ['ParamAngleX', 'ParamAngleY', 'ParamAngleZ', 'ParamBodyAngleX', 'ParamBodyAngleY', 'ParamBodyAngleZ', 'ParamEyeBallX', 'ParamEyeBallY', 'ParamBrowLY', 'ParamBrowRY', 'ParamBrowLAngle', 'ParamBrowRAngle', 'ParamBrowLForm', 'ParamBrowRForm', 'ParamMouthForm', 'ParamMouthOpenY'];
   const MOTION_RESET = {
     selfie: ['phone', 'phone3', 'phone4', 'phone5', 'phone6', 'ParamMouthForm'],
     selfieQuick: ['phone', 'phone3'],
@@ -76,6 +77,17 @@
     ketchup: ['point', 'danbaofan', 'danbaoX', 'danbaoY', 'danbaoz', 'aixing', 'ParamMouthForm', 'ParamMouthOpenY'], // 蛋包饭收回、点菜板放回
     openLid: ['phone', 'phone4', 'phone6'],
     bubble: ['chuipaopao', 'chuipaopao1', 'chuipaopao2', 'chuipaopao3', 'chuipaopao4', 'chuipaopao5', 'chuipaopao6', 'chuipaopao7'], // 泡泡和鼓着的腮帮
+    // 2026-10-30 自制的身体动作：全都首尾回到默认值，这里只是被打断（半路被别的动作顶掉）时兜底归位头 / 身子 / 脸；眼睛交给库的眨眼接管，不在列
+    nod: HEAD_RESET,
+    shakeHead: HEAD_RESET,
+    tiltWink: HEAD_RESET,
+    lookAround: HEAD_RESET,
+    sway: HEAD_RESET,
+    tailWag: [...HEAD_RESET, 'Param10', 'ParamBreath'],
+    catBeckon: [...HEAD_RESET, 'maoshou'], // maoshou = 猫手姿势开关
+    startle: HEAD_RESET,
+    yawn: HEAD_RESET,
+    dozeNod: HEAD_RESET,
   };
 
   // 状态 → 表情/动作。每个状态有几套，切进来时随机挑一套、不连着重复同一套。
@@ -107,13 +119,22 @@
     { motion: 'openLid', w: 3 }, // 翻开粉色翻盖手机看一眼
     { motion: 'ketchup', w: 3 }, // 蛋包饭上挤番茄酱画爱心
     { motion: 'bubble', w: 3 }, // 嚼泡泡糖、吹个泡泡
+    // 2026-10-30 自制的身体动作（assets/live2d/motions/*.motion3.json）：和上面「模型自带」的不同，不是在坐姿上加小变化，而是整个头 / 身子 / 尾巴在动
+    { motion: 'nod', w: 3 }, // 点点头
+    { motion: 'shakeHead', w: 3 }, // 摇摇头
+    { motion: 'tiltWink', w: 3 }, // 歪头眨一只眼
+    { motion: 'lookAround', w: 3 }, // 东张西望（头 + 眼珠跟着转）
+    { motion: 'sway', w: 3 }, // 晃着身子哼歌
+    { motion: 'tailWag', w: 3 }, // 甩尾巴、扇翅膀
+    { motion: 'catBeckon', w: 3 }, // 招财猫：猫手 + 两只爪子轮流招
   ];
   const STATES = {
-    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [6000, 15000] }, // 小动作有 23 个，其中 6 个身体动作权重 3 倍；间隔缩短免得待机像定住不动
+    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [6000, 15000] }, // 小动作有 30 个，其中 13 个身体动作权重 3 倍；间隔缩短免得待机像定住不动
     received: {
       variants: [
         { pulse: [['感叹号'], 1600], face: ['星星眼'] },
         { pulse: [['感叹号'], 1600], face: ['开心兴奋'] },
+        { pulse: [['感叹号'], 1600], face: ['星星眼'], motion: 'startle' }, // 吓一跳：头往后一仰、眉毛挑起、嘴张成 O
       ],
     },
     working: {
@@ -138,7 +159,8 @@
     },
     sleepy: {
       variants: [{ face: ['闭眼口水'] }],
-      acts: [{ pulse: [['吐魂'], 2600] }, { pulse: [['流汗'], 2000] }, { pulse: [['魔爪', '魔爪换色'], 4200] }], // 白魔爪：犯困了续一罐
+      acts: [{ pulse: [['吐魂'], 2600] }, { pulse: [['流汗'], 2000] }, { pulse: [['魔爪', '魔爪换色'], 4200] }, // 白魔爪：犯困了续一罐
+        { motion: 'yawn', w: 2 }, { motion: 'dozeNod', w: 2 }], // 打哈欠 / 打瞌睡点头（猛地抬头惊醒）
       actMs: [20000, 45000],
     },
     error: { variants: [{ face: ['哭'] }, { face: ['悲伤'] }, { face: ['晕晕'] }, { face: ['阴暗', '流汗'] }] },
@@ -181,6 +203,38 @@
     });
   }
 
+  // 2026-10-30 自制动作放在 assets/motions/（随仓库提供）；assets/live2d/ 是安装时按 sha256 下载的上游模型，不含这些动作、也不去改它。
+  // 所以加载前读一遍上游的 model3.json，把自制动作组并进 Motions（上游已有同名组就不动），再把合并后的配置交给库。
+  // 任何一步失败都退回原样（只用模型自带的 8 个动作），不影响桌宠起来。
+  const EXTRA_MOTIONS = ['nod', 'shakeHead', 'tiltWink', 'lookAround', 'sway', 'tailWag', 'catBeckon', 'startle', 'yawn', 'dozeNod'];
+  function loadModelSource() {
+    return new Promise((resolve) => {
+      const fallback = (why) => {
+        console.warn('[dsh-pet] 自制动作没能并进模型配置，只用模型自带动作：' + why);
+        resolve(MODEL_URL);
+      };
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', MODEL_URL);
+        xhr.responseType = 'text';
+        xhr.onerror = () => fallback('读不到 model3.json');
+        xhr.onload = () => {
+          try {
+            const json = JSON.parse(xhr.responseText);
+            const refs = json.FileReferences || (json.FileReferences = {});
+            const motions = refs.Motions || (refs.Motions = {});
+            for (const g of EXTRA_MOTIONS) {
+              if (!motions[g]) motions[g] = [{ File: `../motions/${g}.motion3.json`, FadeInTime: 0.35, FadeOutTime: 0.5 }];
+            }
+            json.url = new URL(MODEL_URL, document.baseURI).href; // 库按这个解析相对路径
+            resolve(json);
+          } catch (e) { fallback(String(e)); }
+        };
+        xhr.send();
+      } catch (e) { fallback(String(e)); }
+    });
+  }
+
   async function start(canvas) {
     if (!window.Live2DCubismCore) throw new Error('没有 Live2D Cubism Core（renderer/vendor/live2dcubismcore.min.js 缺失）');
     if (!window.PIXI || !PIXI.live2d || !PIXI.live2d.Live2DModel) throw new Error('PIXI / pixi-live2d-display 没加载上');
@@ -189,9 +243,10 @@
     let res = window.devicePixelRatio || 1;
     const renderer = new PIXI.Renderer({ view: canvas, width: W, height: H, resolution: res, autoDensity: true, backgroundAlpha: 0, antialias: true });
     const stage = new PIXI.Container();
+    const modelSource = await loadModelSource();
     let model;
     try {
-      model = await withTimeout(PIXI.live2d.Live2DModel.from(MODEL_URL, {
+      model = await withTimeout(PIXI.live2d.Live2DModel.from(modelSource, {
         autoInteract: false, autoUpdate: false, idleMotionGroup: 'idle', motionPreload: 'ALL',
       }), LOAD_TIMEOUT_MS, '模型加载');
     } catch (e) {
@@ -349,11 +404,15 @@
     let ptr = null; // 光标在窗口里的位置（CSS px）
     window.pet.onCursor((p) => { ptr = { x: p.x - window.screenX, y: p.y - window.screenY }; });
     const gazeAt = toWin(GAZE.cx, GAZE.cy);
+    // 库把视线（focusController）以「叠加」方式加到 ParamAngleX/Y/Z、ParamEyeBallX/Y、ParamBodyAngleX 上（头 ±30°、眼珠 ±1）。
+    // 光标离得远时它会和动作自己的头 / 眼曲线抵消甚至顶到参数上限，点头摇头东张西望就看不出来 → 一次性动作播放期间视线让位，只留一点
+    const GAZE_YIELD = 0.2;
     function updateGaze() {
       if (!ptr) return;
       const nx = clamp((ptr.x - gazeAt.x) / GAZE.rx, -1, 1);
       const ny = clamp((gazeAt.y - ptr.y) / GAZE.ry - (st.gazeDown || 0), -1, 1);
-      im.focusController.focus(nx, ny);
+      const k = oneShot !== null ? GAZE_YIELD : 1;
+      im.focusController.focus(nx * k, ny * k);
     }
     let hovering = false;
     const api = { onHover: null };
@@ -412,6 +471,8 @@
 
     return Object.assign(api, {
       setState,
+      // 直接播一段动作（调试用，也给以后用）；缺省 FORCE = 顶掉正在播的
+      play(group, priority) { playMotion(group, priority ?? PIXI.live2d.MotionPriority.FORCE); },
       // 戳的位置：上半截算戳头；side -1..1 = 偏左/偏右
       where(x, y) {
         const h = toWin(HEAD.x, HEAD.neck);
