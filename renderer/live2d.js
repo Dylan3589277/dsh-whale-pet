@@ -80,7 +80,7 @@
 
   // 状态 → 表情/动作。每个状态有几套，切进来时随机挑一套、不连着重复同一套。
   //   face: 整个状态期间挂着的表情   pulse: 进来先闪一下的表情 [名字, 毫秒]   motion: 进来时播一次的动作（motionDelay 毫秒后）
-  //   acts: 待在这个状态里时，每隔 actMs 随机做一个小动作（也不连着重复）；小动作里 then: [名字, 毫秒, 延迟] = 隔一会儿再闪一个
+  //   acts: 待在这个状态里时，每隔 actMs 随机做一个小动作（也不连着重复，可带 w 权重，缺省 1）；小动作里 then: [名字, 毫秒, 延迟] = 隔一会儿再闪一个
   const IDLE_ACTS = [
     { pulse: [['星星眼'], 2600] },
     { pulse: [['脸红'], 3000] },
@@ -89,8 +89,8 @@
     { pulse: [['爱心眼'], 2600] },
     { pulse: [['吐舌'], 2000] },
     { pulse: [['喵喵手'], 3200] },
-    { motion: 'selfieQuick' },
-    { pulse: [['鲸鱼'], 4200], motion: 'splash', motionDelay: 500 }, // 小鲸鱼先淡入再喷水
+    { motion: 'selfieQuick', w: 3 },
+    { pulse: [['鲸鱼'], 4200], motion: 'splash', motionDelay: 500, w: 3 }, // 小鲸鱼先淡入再喷水
     // 道具 / 贴纸 / 装扮：挂几秒再摘掉
     { pulse: [['墨镜'], 3000] },
     { pulse: [['头箍'], 3600] }, // 摘下头箍透口气（淡入途中会一闪而过半透明的头箍，正常）
@@ -103,13 +103,13 @@
     { pulse: [['深色桌布'], 4000] },
     { pulse: [['鲸鱼放桌上'], 4200] }, // 小鲸鱼下来趴桌上
     // 模型自带的另外几段动作
-    { pulse: [['手机换色'], 4300], motion: 'selfie' }, // 换白手机认真自拍（动作 3.3 秒 + 手机收回）
-    { motion: 'openLid' }, // 翻开粉色翻盖手机看一眼
-    { motion: 'ketchup' }, // 蛋包饭上挤番茄酱画爱心
-    { motion: 'bubble' }, // 嚼泡泡糖、吹个泡泡
+    { pulse: [['手机换色'], 4300], motion: 'selfie', w: 3 }, // 换白手机认真自拍（动作 3.3 秒 + 手机收回）
+    { motion: 'openLid', w: 3 }, // 翻开粉色翻盖手机看一眼
+    { motion: 'ketchup', w: 3 }, // 蛋包饭上挤番茄酱画爱心
+    { motion: 'bubble', w: 3 }, // 嚼泡泡糖、吹个泡泡
   ];
   const STATES = {
-    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [15000, 40000] }, // 小动作有 23 个，间隔放宽一点免得太闹
+    idle: { variants: [{}], acts: IDLE_ACTS, actMs: [6000, 15000] }, // 小动作有 23 个，其中 6 个身体动作权重 3 倍；间隔缩短免得待机像定住不动
     received: {
       variants: [
         { pulse: [['感叹号'], 1600], face: ['星星眼'] },
@@ -159,6 +159,20 @@
     let i = Math.floor(Math.random() * (n - 1));
     if (i >= avoid && avoid >= 0) i++;
     return i;
+  }
+  function pickWeighted(items, avoid) { // 按 w（缺省 1）加权抽一个下标，不连着重复 avoid
+    if (items.length <= 1) return 0;
+    let total = 0;
+    for (let i = 0; i < items.length; i++) if (i !== avoid) total += items[i].w || 1;
+    let r = Math.random() * total;
+    let last = 0;
+    for (let i = 0; i < items.length; i++) {
+      if (i === avoid) continue;
+      last = i;
+      r -= items[i].w || 1;
+      if (r < 0) return i;
+    }
+    return last; // 浮点兜底
   }
   function withTimeout(p, ms, what) {
     return new Promise((resolve, reject) => {
@@ -298,7 +312,7 @@
       if (!st.acts) return;
       actTimer = setTimeout(() => {
         if (!oneShot) {
-          const i = pickIndex(st.acts.length, lastAct);
+          const i = pickWeighted(st.acts, lastAct);
           lastAct = i;
           runAct(st.acts[i]);
         }
